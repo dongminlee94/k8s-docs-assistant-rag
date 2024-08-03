@@ -1,0 +1,12 @@
+requests
+beautifulsoup4
+tqdm
+pandas
+openai
+langchain
+langchain-openai
+langchain-community
+unstructured
+faiss-cpu
+pyarrow
+fastparquet
