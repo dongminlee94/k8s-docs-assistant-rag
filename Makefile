@@ -4,6 +4,7 @@ setup:
 setup-dev:
 	make setup
 	pip install -r requirements-dev.txt
+	pre-commit install
 
 check:
 	make format
