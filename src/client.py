@@ -14,7 +14,6 @@ class OpenAIClient:
 
         :param api_key: The API key to authenticate with the OpenAI service.
         """
-        self._api_key = api_key
         self._client = OpenAI(api_key=api_key)
 
     def create_embedding(self, text: str, model: str) -> list[float]:

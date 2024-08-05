@@ -15,4 +15,4 @@ format:
 	isort . --profile black
 
 lint:
-	flake8 . --max-line-length 110
+	flake8 . --max-line-length 110 --extend-ignore E203

@@ -3,14 +3,12 @@
 import os
 
 import yaml
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.prompts.base import BasePromptTemplate
 
 
-class LangchainPrompt:
-    """Langchain Prompt.
+class OpenAIPrompt:
+    """OpenAI Prompt.
 
-    This class is used to load and manage prompt templates for Langchain.
+    This class is used to load and manage prompt templates for OpenAI.
     """
 
     def __init__(self, prompt_name: str) -> None:
@@ -21,27 +19,8 @@ class LangchainPrompt:
         self._prompt_name = prompt_name
         self._prompt_template = self._get_template()
 
-    def _get_template_type(self, template: str | list[list[str]] | list[tuple[str]]) -> str:
-        """Determine the type of the template.
-
-        :param template: The template to be checked.
-        :returns: A string indicating the type of the template ('string' or 'chat').
-        :raises ValueError: If the template does not match the expected formats.
-        """
-        if isinstance(template, str):
-            return "string"
-        elif isinstance(template, list) and all(
-            isinstance(piece, str) and len(chat) == 2 for chat in template for piece in chat
-        ):
-            return "chat"
-
-        raise ValueError("The provided template does not match the expected format for 'string' or 'chat'.")
-
-    def _get_template(self) -> str | list[tuple[str]]:
-        """Load the prompt template from a YAML file.
-
-        :returns: The loaded template, either as a string or a list of tuples.
-        """
+    def _get_template(self) -> list[dict[str, str]]:
+        """"""
         prompt_file_path = os.path.join(
             os.path.dirname(__file__), "..", "prompt", f"{self._prompt_name}.yaml"
         )
@@ -51,33 +30,26 @@ class LangchainPrompt:
 
         template = prompt["template"]
 
-        if self._get_template_type(template=template) == "chat":
-            template = [tuple(chat) for chat in template]
+        if isinstance(template, list) and all(
+            isinstance(piece, str) and len(chat) == 2 for chat in template for piece in chat
+        ):
+            return [{chat[0]: chat[1]} for chat in template]
 
-        return template
+        raise ValueError("The provided template does not match the expected format.")
 
-    @property
-    def template_type(self) -> str:
-        """Get the type of the loaded template.
-
-        :returns: A string indicating the type of the template ('string' or 'chat').
-        """
-        return self._get_template_type(template=self._prompt_template)
-
-    @property
-    def template(self) -> BasePromptTemplate:
-        """Get the prompt template in the appropriate Langchain format.
-
-        :returns: The prompt template as a BasePromptTemplate object.
-        """
-        if self.template_type == "string":
-            return PromptTemplate.from_template(self._prompt_template)
-        elif self.template_type == "chat":
-            return ChatPromptTemplate.from_messages(self._prompt_template)
+    def format(self, parameters: dict[str, str] | None) -> list[dict[str, str]]:
+        """"""
+        return [
+            {"role": role, "content": template.format(**parameters)}
+            for message in self._prompt_template
+            for role, template in message.items()
+        ]
 
 
 if __name__ == "__main__":
-    prompt_name = "summarizer"
-    prompt = LangchainPrompt(prompt_name=prompt_name)
-    print(prompt.template_type)
-    print(prompt.template)
+    prompt_name = "summary"
+    prompt = OpenAIPrompt(prompt_name=prompt_name)
+
+    parameters = {"text": "안녕 들리니?"}
+    messages = prompt.format(parameters=parameters)
+    print(messages)
