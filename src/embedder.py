@@ -1,36 +1,35 @@
 """Embedder."""
 
 import os
+from typing import Any
 
 import pandas as pd
-
-# import tiktoken
+import tiktoken
 
 df = pd.read_parquet(os.path.join(os.path.dirname(__file__), "..", "data/summary.parquet"))
 
-print(df.shape)
+embedding_model = "text-embedding-3-large"
+encoding_name = "cl100k_base"
+max_tokens = 8192
 
-# embedding_model = "text-embedding-3-large"
-# max_tokens = 8192
+df["embedding_input"] = df["title"] + " " + df["content"]
 
-# df["embedding_input"] = df["title"] + " " + df["content"]
-
-# columns = ["title", "url", "content", "summary", "embedding_input"]
-# new_df = pd.DataFrame(columns=columns)
-
-
-# def make_chunks(content: str, length: int) -> list[str]:
-#     return [content[i : i + length] for i in range(0, len(content), length)]
+columns = ["title", "url", "content", "summary", "embedding_input"]
+new_df = pd.DataFrame(columns=columns)
 
 
-# tokenizer = tiktoken.get_encoding("cl100k_base")
+def make_chunks(data: str | list[Any], length: int) -> list[str]:
+    return [data[i : i + length] for i in range(0, len(data), length)]
 
-# for idx, row in df.iterrows():
-#     if len(row["embedding_input"]) >= max_tokens:
-#         print(row["title"])
-#         print(len(row["embedding_input"]))
-#         print(len(tokenizer.encode(row["embedding_input"])))
-#         print()
+
+encoding = tiktoken.get_encoding(encoding_name=encoding_name)
+
+for idx, row in df.iterrows():
+    embedding_input = row["embedding_input"]
+    tokens = encoding.encode(text=embedding_input)
+
+    for chunk in make_chunks(data=tokens, length=max_tokens):
+        text = encoding.decode(tokens=chunk)
 
 
 # with open(os.path.join(os.path.dirname(__file__), "..", "env/api_key.env"), "r") as file:
