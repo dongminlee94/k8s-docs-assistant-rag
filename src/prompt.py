@@ -20,7 +20,11 @@ class OpenAIPrompt:
         self._prompt_template = self._get_template()
 
     def _get_template(self) -> list[dict[str, str]]:
-        """"""
+        """Load the prompt template from a YAML file.
+
+        :returns: A list of dictionaries with roles and templates.
+        :raises ValueError: If the template format is not as expected.
+        """
         prompt_file_path = os.path.join(
             os.path.dirname(__file__), "..", "prompt", f"{self._prompt_name}.yaml"
         )
@@ -35,10 +39,23 @@ class OpenAIPrompt:
         ):
             return [{chat[0]: chat[1]} for chat in template]
 
-        raise ValueError("The provided template does not match the expected format.")
+        raise ValueError("The template must be a list of pairs like [['role', 'content']].")
 
-    def format(self, parameters: dict[str, str] | None) -> list[dict[str, str]]:
-        """"""
+    def format(self, parameters: dict[str, str] | None = None) -> list[dict[str, str]]:
+        """Format the prompt template with given parameters.
+
+        :param parameters: A dictionary of parameters to format the template.
+        :returns: A list of formatted messages with roles and contents.
+
+        Example:
+            >>> prompt = OpenAIPrompt(prompt_name="summary")
+            >>> parameters = {"text": "Hello?"}
+            >>> messages = prompt.format(parameters=parameters)
+            >>> print(messages)
+            [{'role': 'system', 'content': 'You are an assistant.'}, {'role': 'user', 'content': 'Hello?'}]
+        """
+        parameters = parameters if parameters else {}
+
         return [
             {"role": role, "content": template.format(**parameters)}
             for message in self._prompt_template
@@ -50,6 +67,7 @@ if __name__ == "__main__":
     prompt_name = "summary"
     prompt = OpenAIPrompt(prompt_name=prompt_name)
 
-    parameters = {"text": "안녕 들리니?"}
+    parameters = {"text": "안녕?"}
     messages = prompt.format(parameters=parameters)
+
     print(messages)

@@ -62,7 +62,12 @@ class DocsSummarizer:
 
     @staticmethod
     def _split_text(text: str, chunk_size: int) -> list[str]:
-        """"""
+        """Split the text into chunks of specified size.
+
+        :param text: The text to be split.
+        :param chunk_size: The size of each chunk.
+        :returns: A list of text chunks.
+        """
         return [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
 
     def summarize_docs(
@@ -72,11 +77,20 @@ class DocsSummarizer:
         response_format: dict[str, str] = {"type": "text"},
         temperature: int = 0,
     ) -> None:
-        """Summarize the documentation content and save the summaries to a parquet file.
+        """Summarize the documentation files.
 
-        :param chunk_size: The size of text chunks for summarization.
-        :param model: The model name to be used for summarization.
-        :param temperature: The temperature setting for the model.
+        :param model: The model to be used for generating summaries.
+        :param chunk_size: The size of each text chunk.
+        :param response_format: The format of the response from the model.
+        :param temperature: The temperature value for sampling; higher values make the output more random.
+
+        Example:
+            >>> summarizer = DocsSummarizer(
+            ...     target_subdirs=["home", "setup", "test"],
+            ...     api_key="your_api_key",
+            ...     prompt_name="summary"
+            ... )
+            >>> summarizer.summarize_docs(model="gpt-4o-mini", chunk_size=128000)
         """
         print(f"The number of rows in the DataFrame to summarize: {len(self._unsummarized_df)}")
 
@@ -105,7 +119,7 @@ if __name__ == "__main__":
     with open(os.path.join(os.path.dirname(__file__), "..", "env/api_key.env"), "r") as file:
         api_key = file.read().strip()
 
-    target_subdirs = ["home"]  # , "setup", "test"]
+    target_subdirs = ["home", "setup", "test"]
     prompt_name = "summary"
 
     summarizer = DocsSummarizer(

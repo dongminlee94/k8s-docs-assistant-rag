@@ -9,5 +9,5 @@ template:
     규칙1. 글에 시간, 증명자료, 지원여부 관련 설명이 있다면 무조건 가져와줘.
 - - "user"
   - |
-    --- Document ---
+    --- DOCUMENT ---
     {text}
