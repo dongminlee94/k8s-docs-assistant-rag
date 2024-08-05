@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 from client import OpenAIClient
-from prompt import OpenAIPrompt
+from prompt import PromptTemplate
 
 
 class DocsSummarizer:
@@ -26,25 +26,24 @@ class DocsSummarizer:
         self._input_dir = os.path.join(os.path.dirname(__file__), "..", "data/docs")
         self._output_path = os.path.join(os.path.dirname(__file__), "..", "data/summary.parquet")
         self._target_subdirs = target_subdirs
-
-        self._summarized_df = (
-            pd.read_parquet(self._output_path)
-            if os.path.exists(self._output_path)
-            else pd.DataFrame(columns=["title", "url", "content"])
-        )
-        self._unsummarized_df = self._read_docs()
+        self._base_columns = ["title", "url", "content"]
 
         self._openai_client = OpenAIClient(api_key=api_key)
-        self._openai_prompt = OpenAIPrompt(prompt_name=prompt_name)
+        self._prompt_template = PromptTemplate(prompt_name=prompt_name)
 
-    def _read_docs(self) -> pd.DataFrame:
+    def _read_docs(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Read the documentation files and return a DataFrame.
 
         :returns: DataFrame containing the documentation content.
         """
-        dfs = []
+        if os.path.exists(self._output_path):
+            summarized_df = pd.read_parquet(self._output_path)
+            summarized_title = set(summarized_df["title"].tolist())
+        else:
+            summarized_df = pd.DataFrame(columns=self._base_columns)
+            summarized_title = []
 
-        summarized_title = set(self._summarized_df["title"].tolist())
+        dfs = []
 
         def __read_docs(input_dir: str) -> pd.DataFrame:
             for entry in os.scandir(input_dir):
@@ -58,10 +57,12 @@ class DocsSummarizer:
 
             return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
-        return __read_docs(input_dir=self._input_dir)
+        unsummarized_df = __read_docs(input_dir=self._input_dir)
+
+        return summarized_df, unsummarized_df
 
     @staticmethod
-    def _split_text(text: str, chunk_size: int) -> list[str]:
+    def split_text(text: str, chunk_size: int) -> list[str]:
         """Split the text into chunks of specified size.
 
         :param text: The text to be split.
@@ -92,15 +93,17 @@ class DocsSummarizer:
             ... )
             >>> summarizer.summarize_docs(model="gpt-4o-mini", chunk_size=128000)
         """
-        print(f"The number of rows in the DataFrame to summarize: {len(self._unsummarized_df)}")
+        summarized_df, unsummarized_df = self._read_docs()
 
-        for idx, row in self._unsummarized_df.iterrows():
-            splited_texts = self._split_text(text=row["content"], chunk_size=chunk_size)
+        print(f"The number of rows in the DataFrame to summarize: {len(unsummarized_df)}")
+
+        for idx, row in unsummarized_df.iterrows():
+            splited_texts = self.split_text(text=row["content"], chunk_size=chunk_size)
 
             summary = []
             for text in splited_texts:
                 parameters = {"text": text}
-                messages = self._openai_prompt.format(parameters=parameters)
+                messages = self._prompt_template.format(parameters=parameters)
 
                 response = self._openai_client.create_completion(
                     messages=messages, model=model, response_format=response_format, temperature=temperature
@@ -108,9 +111,9 @@ class DocsSummarizer:
 
                 summary.append(response)
 
-            self._unsummarized_df.loc[idx, "summary"] = " ".join(summary)
+            unsummarized_df.loc[idx, "summary"] = " ".join(summary)
 
-        summary_df = pd.concat([self._summarized_df, self._unsummarized_df], ignore_index=True)
+        summary_df = pd.concat([summarized_df, unsummarized_df], ignore_index=True)
 
         summary_df.to_parquet(path=self._output_path, index=False)
 

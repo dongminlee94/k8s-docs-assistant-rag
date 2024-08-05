@@ -5,14 +5,14 @@ import os
 import yaml
 
 
-class OpenAIPrompt:
-    """OpenAI Prompt.
+class PromptTemplate:
+    """Prompt Template.
 
-    This class is used to load and manage prompt templates for OpenAI.
+    This class is used to load and manage prompt templates.
     """
 
     def __init__(self, prompt_name: str) -> None:
-        """Initialize the LangchainPrompt.
+        """Initialize the Prompt Template.
 
         :param prompt_name: The name of the prompt to load.
         """
@@ -48,9 +48,9 @@ class OpenAIPrompt:
         :returns: A list of formatted messages with roles and contents.
 
         Example:
-            >>> prompt = OpenAIPrompt(prompt_name="summary")
+            >>> prompt_template = PromptTemplate(prompt_name="summary")
             >>> parameters = {"text": "Hello?"}
-            >>> messages = prompt.format(parameters=parameters)
+            >>> messages = prompt_template.format(parameters=parameters)
             >>> print(messages)
             [{'role': 'system', 'content': 'You are an assistant.'}, {'role': 'user', 'content': 'Hello?'}]
         """
@@ -65,9 +65,9 @@ class OpenAIPrompt:
 
 if __name__ == "__main__":
     prompt_name = "summary"
-    prompt = OpenAIPrompt(prompt_name=prompt_name)
+    prompt_template = PromptTemplate(prompt_name=prompt_name)
 
     parameters = {"text": "안녕?"}
-    messages = prompt.format(parameters=parameters)
+    messages = prompt_template.format(parameters=parameters)
 
     print(messages)
