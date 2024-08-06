@@ -37,8 +37,8 @@ class DocsEmbedder:
         encoding = tiktoken.get_encoding(encoding_name=encoding_name)
 
         rows = []
-        for idx, row in df.iterrows():
-            embedding_input = row["embedding_input"]
+        for row in df.itertuples(index=False):
+            embedding_input = row.embedding_input
             tokens = encoding.encode(text=embedding_input)
 
             for chunk in self.make_chunks(data=tokens, length=max_tokens):
@@ -46,10 +46,10 @@ class DocsEmbedder:
 
                 rows.append(
                     {
-                        "title": row["title"],
-                        "url": row["url"],
-                        "content": row["content"],
-                        "summary": row["summary"],
+                        "title": row.title,
+                        "url": row.url,
+                        "content": row.content,
+                        "summary": row.summary,
                         "embedding_input": text,
                         "embedding_output": None,
                     },
