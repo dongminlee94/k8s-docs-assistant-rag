@@ -1,10 +1,10 @@
 # Kubernetes Documentation Assistant using RAG
 
-- "concepts": 144개
-- "contribute": 32개
-- "home": 1개
-- "reference": 309개
-- "setup": 22개
-- "tasks": 197개
-- "test": 1개
-- "tutorials": 37개
+- concepts: 144
+- contribute: 32
+- home: 1
+- reference: 309
+- setup: 22
+- tasks: 197
+- test: 1
+- tutorials: 37
