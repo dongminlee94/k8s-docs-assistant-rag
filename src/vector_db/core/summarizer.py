@@ -3,10 +3,10 @@
 import os
 
 import pandas as pd
-
-from client import OpenAIClient
-from prompt import PromptTemplate
-from util import make_chunks
+from core.client import OpenAIClient
+from core.prompt import PromptTemplate
+from core.util import make_chunks
+from tqdm import tqdm
 
 
 class DocsSummarizer:
@@ -24,8 +24,8 @@ class DocsSummarizer:
         :param api_key: The API key for accessing the model.
         :param prompt_name: The name of the prompt to use.
         """
-        self._input_dir = os.path.join(os.path.dirname(__file__), "..", "data/docs")
-        self._output_path = os.path.join(os.path.dirname(__file__), "..", "data/summary.parquet")
+        self._input_dir = os.path.join(os.path.dirname(__file__), "../../..", "data/docs")
+        self._output_path = os.path.join(os.path.dirname(__file__), "../../..", "data/summary.parquet")
         self._target_subdirs = target_subdirs
         self._base_columns = ["title", "url", "content"]
 
@@ -68,6 +68,7 @@ class DocsSummarizer:
         context_window: int,
         response_format: dict[str, str] = {"type": "text"},
         temperature: int = 0,
+        verbose: bool = False,
     ) -> None:
         """Summarize the documentation files.
 
@@ -75,6 +76,7 @@ class DocsSummarizer:
         :param context_window: The maximum number of tokens per request to the model.
         :param response_format: The format of the response from the model.
         :param temperature: The temperature value for sampling; higher values make the output more random.
+        :param verbose: Whether to display progress.
 
         Example:
             >>> summarizer = DocsSummarizer(
@@ -82,14 +84,14 @@ class DocsSummarizer:
             ...     api_key="your_api_key",
             ...     prompt_name="summary"
             ... )
-            >>> summarizer.summarize_docs(model="gpt-4o-mini", context_window=128000)
+            >>> summarizer.summarize_docs(model="gpt-4o-mini", context_window=128000, verbose=True)
         """
         summarized_df, unsummarized_df = self._read_docs()
 
         print(f"The number of rows in the DataFrame to summarize: {len(unsummarized_df)}")
 
-        for idx, row in unsummarized_df.iterrows():
-            splited_texts = make_chunks(data=row["content"], length=context_window)
+        for row in tqdm(unsummarized_df.itertuples()) if verbose else unsummarized_df.itertuples():
+            splited_texts = make_chunks(data=row.content, length=context_window)
 
             summary = []
             for text in splited_texts:
@@ -102,26 +104,8 @@ class DocsSummarizer:
 
                 summary.append(response)
 
-            unsummarized_df.loc[idx, "summary"] = " ".join(summary)
+            unsummarized_df.loc[row.Index, "summary"] = " ".join(summary)
 
         summary_df = pd.concat([summarized_df, unsummarized_df], ignore_index=True)
 
         summary_df.to_parquet(path=self._output_path, index=False)
-
-
-if __name__ == "__main__":
-    with open(os.path.join(os.path.dirname(__file__), "..", "env/api_key.env"), "r") as file:
-        api_key = file.read().strip()
-
-    target_subdirs = ["home", "setup", "test"]
-    prompt_name = "summary"
-
-    summarizer = DocsSummarizer(
-        target_subdirs=target_subdirs,
-        api_key=api_key,
-        prompt_name=prompt_name,
-    )
-
-    model = "gpt-4o-mini"
-    context_window = 128000
-    summarizer.summarize_docs(model=model, context_window=context_window)

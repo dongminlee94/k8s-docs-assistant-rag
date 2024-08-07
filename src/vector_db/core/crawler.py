@@ -204,19 +204,3 @@ class K8sDocsCrawler:
                 results[index] = item
 
         return results
-
-
-if __name__ == "__main__":
-    url = "https://kubernetes.io/docs/home"
-
-    crawler = K8sDocsCrawler(url=url)
-
-    urls = crawler.get_all_urls()
-    results = crawler.create_all_docs(urls=urls, verbose=True)
-
-    failed = []
-    for result in results:
-        if not result["suceess"]:
-            failed.append(result)
-
-    print(failed)

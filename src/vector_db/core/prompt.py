@@ -26,7 +26,7 @@ class PromptTemplate:
         :raises ValueError: If the template format is not as expected.
         """
         prompt_file_path = os.path.join(
-            os.path.dirname(__file__), "..", "prompt", f"{self._prompt_name}.yaml"
+            os.path.dirname(__file__), "../../..", "prompt", f"{self._prompt_name}.yaml"
         )
 
         with open(prompt_file_path, "r", encoding="utf-8") as file:
