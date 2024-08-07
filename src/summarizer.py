@@ -38,10 +38,10 @@ class DocsSummarizer:
         """
         if os.path.exists(self._output_path):
             summarized_df = pd.read_parquet(self._output_path)
-            summarized_title = set(summarized_df["title"].tolist())
+            summarized_title = set(summarized_df["title"].unique())
         else:
             summarized_df = pd.DataFrame(columns=self._base_columns)
-            summarized_title = []
+            summarized_title = set()
 
         dfs = []
 
