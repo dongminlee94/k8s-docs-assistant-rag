@@ -8,6 +8,7 @@ from core.summarizer import DocsSummarizer
 
 URL = "https://kubernetes.io/docs/home"
 
+# Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["home", "setup", "test"]
 SUMMARIZER_PROMPT_NAME = "summary"
 SUMMARIZER_MODEL = "gpt-4o-mini"
@@ -34,7 +35,7 @@ def crawl_docs() -> None:
     This function initializes the K8sDocsCrawler and retrieves and processes
     all documentation URLs, saving the documents locally.
     """
-    crawler = K8sDocsCrawler(url=URL)
+    crawler = K8sDocsCrawler(url=URL, target_subdirs=TARGET_SUBDIRS)
 
     urls = crawler.get_all_urls()
     results = crawler.create_all_docs(urls=urls, verbose=True)

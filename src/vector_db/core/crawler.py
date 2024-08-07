@@ -18,13 +18,15 @@ class K8sDocsCrawler:
     This class is used to crawl and download documentation from the Kubernetes website.
     """
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, target_subdirs: list[str]) -> None:
         """
         Initialize the K8sDocsCrawler.
 
         :param url: The base URL of the Kubernetes documentation.
+        :param target_subdirs: List of target subdirectories to process.
         """
         self._url = url
+        self._target_subdirs = target_subdirs
         self._base_url = self._get_base_url()
 
     def _requests_retry_session(
@@ -88,7 +90,11 @@ class K8sDocsCrawler:
         for a_tag in soup.find_all("a", href=True):
             href = a_tag["href"]
 
-            if href.startswith("/docs/"):
+            if (
+                href.startswith("/docs/")
+                and not href.endswith("/home/")
+                and href.split("/")[2] in self._target_subdirs
+            ):
                 urls.append(self._base_url + href)
 
         return list(set(urls))
