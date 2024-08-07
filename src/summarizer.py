@@ -62,7 +62,7 @@ class DocsSummarizer:
         return summarized_df, unsummarized_df
 
     @staticmethod
-    def split_text(text: str, chunk_size: int) -> list[str]:
+    def _split_text(text: str, chunk_size: int) -> list[str]:
         """Split the text into chunks of specified size.
 
         :param text: The text to be split.
@@ -98,7 +98,7 @@ class DocsSummarizer:
         print(f"The number of rows in the DataFrame to summarize: {len(unsummarized_df)}")
 
         for idx, row in unsummarized_df.iterrows():
-            splited_texts = self.split_text(text=row["content"], chunk_size=chunk_size)
+            splited_texts = self._split_text(text=row["content"], chunk_size=chunk_size)
 
             summary = []
             for text in splited_texts:

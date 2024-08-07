@@ -33,7 +33,7 @@ class DocsEmbedder:
         ]
 
     @staticmethod
-    def make_chunks(data: str | list[int], length: int) -> list[str]:
+    def _make_chunks(data: str | list[int], length: int) -> list[str]:
         """
         Split the data into chunks of the specified length.
 
@@ -66,7 +66,7 @@ class DocsEmbedder:
         for row in df.itertuples(index=False):
             tokens = encoder.encode(text=row.embedding_input)
 
-            for chunk in self.make_chunks(data=tokens, length=max_tokens):
+            for chunk in self._make_chunks(data=tokens, length=max_tokens):
                 text = encoder.decode(tokens=chunk)
 
                 rows.append(

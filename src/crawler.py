@@ -94,7 +94,7 @@ class K8sDocsCrawler:
         return list(set(urls))
 
     @staticmethod
-    def save_json_file(
+    def _save_json_file(
         file_object: list[dict[str, str]],
         file_path: str,
         ensure_ascii: bool = False,
@@ -163,7 +163,7 @@ class K8sDocsCrawler:
             doc_data = [{"title": title, "url": url, "content": content}]
 
             os.makedirs(output_sub_dir, exist_ok=True)
-            self.save_json_file(file_object=doc_data, file_path=file_path)
+            self._save_json_file(file_object=doc_data, file_path=file_path)
         except Exception as error:
             result = error
             success = False
