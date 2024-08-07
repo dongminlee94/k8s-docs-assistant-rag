@@ -141,6 +141,7 @@ class K8sDocsCrawler:
             file_path = os.path.join(output_sub_dir, file_name)
 
             if os.path.exists(file_path):
+                result = "Document already exists"
                 return index, url, result, success
 
             content = soup.find("div", {"class": "td-content"})

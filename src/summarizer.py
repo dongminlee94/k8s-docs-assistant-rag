@@ -3,12 +3,10 @@
 import os
 
 import pandas as pd
-from langchain.chains.summarize import load_summarize_chain
-from langchain.docstore.document import Document
-from langchain_openai import ChatOpenAI
-from langchain_text_splitters import TokenTextSplitter
 
-from prompt import LangchainPrompt
+from client import OpenAIClient
+from prompt import PromptTemplate
+from util import make_chunks
 
 
 class DocsSummarizer:
@@ -17,42 +15,36 @@ class DocsSummarizer:
     def __init__(
         self,
         target_subdirs: list[str],
-        chunk_size: int,
-        chunk_overlap: int,
-        model: str,
-        temperature: int,
         api_key: str,
         prompt_name: str,
     ) -> None:
         """Initialize the DocsSummarizer.
 
         :param target_subdirs: List of target subdirectories to process.
-        :param chunk_size: The size of text chunks for summarization.
-        :param chunk_overlap: The overlap between text chunks.
-        :param model: The model name to be used for summarization.
-        :param temperature: The temperature setting for the model.
         :param api_key: The API key for accessing the model.
         :param prompt_name: The name of the prompt to use.
         """
         self._input_dir = os.path.join(os.path.dirname(__file__), "..", "data/docs")
-        self._output_path = os.path.join(os.path.dirname(__file__), "..", "data/vector_db.parquet")
+        self._output_path = os.path.join(os.path.dirname(__file__), "..", "data/summary.parquet")
         self._target_subdirs = target_subdirs
+        self._base_columns = ["title", "url", "content"]
 
-        self._summarized_df = pd.read_parquet(self._output_path)
-        self._unsummarized_df = self._read_docs()
+        self._openai_client = OpenAIClient(api_key=api_key)
+        self._prompt_template = PromptTemplate(prompt_name=prompt_name)
 
-        self._text_splitter = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        self._chat_model = ChatOpenAI(model=model, temperature=temperature, api_key=api_key)
-        self._prompt = LangchainPrompt(prompt_name=prompt_name)
-
-    def _read_docs(self) -> pd.DataFrame:
+    def _read_docs(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Read the documentation files and return a DataFrame.
 
         :returns: DataFrame containing the documentation content.
         """
-        dfs = []
+        if os.path.exists(self._output_path):
+            summarized_df = pd.read_parquet(self._output_path)
+            summarized_urls = set(summarized_df["url"].unique())
+        else:
+            summarized_df = pd.DataFrame(columns=self._base_columns)
+            summarized_urls = set()
 
-        summarized_title = set(self._summarized_df["title"].tolist())
+        dfs = []
 
         def __read_docs(input_dir: str) -> pd.DataFrame:
             for entry in os.scandir(input_dir):
@@ -61,37 +53,58 @@ class DocsSummarizer:
                 elif entry.is_file():
                     df = pd.read_json(entry.path)
 
-                    if df["title"].item() not in summarized_title:
+                    if df["url"].item() not in summarized_urls:
                         dfs.append(df)
 
             return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
 
-        return __read_docs(input_dir=self._input_dir)
+        unsummarized_df = __read_docs(input_dir=self._input_dir)
 
-    def summarize_docs(self) -> None:
-        """Summarize the documentation content and save the summaries to a parquet file."""
-        print(f"The number of rows in the DataFrame to summarize: {len(self._unsummarized_df)}")
+        return summarized_df, unsummarized_df
 
-        for idx, row in self._unsummarized_df.iterrows():
-            splited_texts = self._text_splitter.split_text(row["content"])
-            documented_texts = [Document(page_content=text) for text in splited_texts]
+    def summarize_docs(
+        self,
+        model: str,
+        context_window: int,
+        response_format: dict[str, str] = {"type": "text"},
+        temperature: int = 0,
+    ) -> None:
+        """Summarize the documentation files.
+
+        :param model: The model to be used for generating summaries.
+        :param context_window: The maximum number of tokens per request to the model.
+        :param response_format: The format of the response from the model.
+        :param temperature: The temperature value for sampling; higher values make the output more random.
+
+        Example:
+            >>> summarizer = DocsSummarizer(
+            ...     target_subdirs=["home", "setup", "test"],
+            ...     api_key="your_api_key",
+            ...     prompt_name="summary"
+            ... )
+            >>> summarizer.summarize_docs(model="gpt-4o-mini", context_window=128000)
+        """
+        summarized_df, unsummarized_df = self._read_docs()
+
+        print(f"The number of rows in the DataFrame to summarize: {len(unsummarized_df)}")
+
+        for idx, row in unsummarized_df.iterrows():
+            splited_texts = make_chunks(data=row["content"], length=context_window)
 
             summary = []
-            for text in documented_texts:
-                chain = load_summarize_chain(
-                    llm=self._chat_model,
-                    chain_type="stuff",
-                    prompt=self._prompt.template,
+            for text in splited_texts:
+                parameters = {"text": text}
+                messages = self._prompt_template.format(parameters=parameters)
+
+                response = self._openai_client.create_completion(
+                    messages=messages, model=model, response_format=response_format, temperature=temperature
                 )
 
-                parameters = {"input_documents": [text]}
-                output = chain.invoke(parameters, return_only_outputs=True)
+                summary.append(response)
 
-                summary.append(output["output_text"])
+            unsummarized_df.loc[idx, "summary"] = " ".join(summary)
 
-            self._unsummarized_df.loc[idx, "summary"] = " ".join(summary)
-
-        summary_df = pd.concat([self._summarized_df, self._unsummarized_df], ignore_index=True)
+        summary_df = pd.concat([summarized_df, unsummarized_df], ignore_index=True)
 
         summary_df.to_parquet(path=self._output_path, index=False)
 
@@ -100,31 +113,15 @@ if __name__ == "__main__":
     with open(os.path.join(os.path.dirname(__file__), "..", "env/api_key.env"), "r") as file:
         api_key = file.read().strip()
 
-    # "concepts": 144개
-    # "contribute": 32개
-    # "home": 1개
-    # "reference": 309개
-    # "setup": 22개
-    # "tasks": 197개
-    # "test": 1개
-    # "tutorials": 37개
-
     target_subdirs = ["home", "setup", "test"]
-    chunk_size = 128000
-    chunk_overlap = 0
-    model = "gpt-4o-mini"
-    temperature = 0
-    api_key = api_key
-    prompt_name = "summarizer"
+    prompt_name = "summary"
 
     summarizer = DocsSummarizer(
         target_subdirs=target_subdirs,
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        model=model,
-        temperature=temperature,
         api_key=api_key,
         prompt_name=prompt_name,
     )
 
-    summarizer.summarize_docs()
+    model = "gpt-4o-mini"
+    context_window = 128000
+    summarizer.summarize_docs(model=model, context_window=context_window)
