@@ -63,7 +63,7 @@ class DocsEmbedder:
         encoder = tiktoken.encoding_for_model(model_name=model)
 
         rows = []
-        for row in df.itertuples(index=False):
+        for row in df.itertuples():
             tokens = encoder.encode(text=row.embedding_input)
 
             for chunk in self._make_chunks(data=tokens, length=max_tokens):
@@ -90,9 +90,9 @@ class DocsEmbedder:
         :param model: The name of the embedding model to use.
         :returns: DataFrame with the embedding output.
         """
-        for idx, row in df.iterrows():
-            embedding_output = self._openai_client.create_embedding(text=row["embedding_input"], model=model)
-            df.loc[idx, "embedding_output"] = embedding_output
+        for row in df.itertuples():
+            embedding_output = self._openai_client.create_embedding(text=row.embedding_input, model=model)
+            df.loc[row.Index, "embedding_output"] = embedding_output
 
         return df
 
@@ -112,10 +112,14 @@ class DocsEmbedder:
             >>> embedder = DocsEmbedder(api_key="your_api_key")
             >>> embedder.embed_docs(model="text-embedding-3-large", max_tokens=8192)
         """
+        print("Starting the embedding process...")
+
         embedding_df = self._get_embedding_input(model=model, max_tokens=max_tokens)
         embedding_df = self._get_embedding_output(df=embedding_df, model=model)
 
         embedding_df.to_parquet(path=self._output_path, index=False)
+
+        print(f"Embedding process completed. The results are saved to {self._output_path.split('/../')[-1]}.")
 
 
 if __name__ == "__main__":
