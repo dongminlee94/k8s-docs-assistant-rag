@@ -6,6 +6,7 @@ import pandas as pd
 
 from client import OpenAIClient
 from prompt import PromptTemplate
+from util import make_chunks
 
 
 class DocsSummarizer:
@@ -61,27 +62,17 @@ class DocsSummarizer:
 
         return summarized_df, unsummarized_df
 
-    @staticmethod
-    def _split_text(text: str, chunk_size: int) -> list[str]:
-        """Split the text into chunks of specified size.
-
-        :param text: The text to be split.
-        :param chunk_size: The size of each chunk.
-        :returns: A list of text chunks.
-        """
-        return [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
-
     def summarize_docs(
         self,
         model: str,
-        chunk_size: int,
+        context_window: int,
         response_format: dict[str, str] = {"type": "text"},
         temperature: int = 0,
     ) -> None:
         """Summarize the documentation files.
 
         :param model: The model to be used for generating summaries.
-        :param chunk_size: The size of each text chunk.
+        :param context_window: The maximum number of tokens per request to the model.
         :param response_format: The format of the response from the model.
         :param temperature: The temperature value for sampling; higher values make the output more random.
 
@@ -91,14 +82,14 @@ class DocsSummarizer:
             ...     api_key="your_api_key",
             ...     prompt_name="summary"
             ... )
-            >>> summarizer.summarize_docs(model="gpt-4o-mini", chunk_size=128000)
+            >>> summarizer.summarize_docs(model="gpt-4o-mini", context_window=128000)
         """
         summarized_df, unsummarized_df = self._read_docs()
 
         print(f"The number of rows in the DataFrame to summarize: {len(unsummarized_df)}")
 
         for idx, row in unsummarized_df.iterrows():
-            splited_texts = self._split_text(text=row["content"], chunk_size=chunk_size)
+            splited_texts = make_chunks(data=row["content"], length=context_window)
 
             summary = []
             for text in splited_texts:
@@ -132,5 +123,5 @@ if __name__ == "__main__":
     )
 
     model = "gpt-4o-mini"
-    chunk_size = 128000
-    summarizer.summarize_docs(model=model, chunk_size=chunk_size)
+    context_window = 128000
+    summarizer.summarize_docs(model=model, context_window=context_window)
