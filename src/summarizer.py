@@ -38,10 +38,10 @@ class DocsSummarizer:
         """
         if os.path.exists(self._output_path):
             summarized_df = pd.read_parquet(self._output_path)
-            summarized_title = set(summarized_df["title"].unique())
+            summarized_urls = set(summarized_df["url"].unique())
         else:
             summarized_df = pd.DataFrame(columns=self._base_columns)
-            summarized_title = set()
+            summarized_urls = set()
 
         dfs = []
 
@@ -52,7 +52,7 @@ class DocsSummarizer:
                 elif entry.is_file():
                     df = pd.read_json(entry.path)
 
-                    if df["title"].item() not in summarized_title:
+                    if df["url"].item() not in summarized_urls:
                         dfs.append(df)
 
             return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()

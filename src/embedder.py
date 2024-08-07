@@ -61,10 +61,10 @@ class DocsEmbedder:
         """
         if os.path.exists(self._output_path):
             embedded_df = pd.read_parquet(self._output_path)
-            embedded_title = set(embedded_df["title"].unique())
+            embedded_urls = set(embedded_df["url"].unique())
         else:
             embedded_df = pd.DataFrame(columns=self._base_columns[:-2])
-            embedded_title = set()
+            embedded_urls = set()
 
         unembedded_df = pd.read_parquet(self._input_path)
         unembedded_df["embedding_input"] = unembedded_df["title"] + " " + unembedded_df["content"]
@@ -73,7 +73,7 @@ class DocsEmbedder:
 
         rows = []
         for row in unembedded_df.itertuples():
-            if row.title in embedded_title:
+            if row.url in embedded_urls:
                 continue
 
             tokens = encoder.encode(text=row.embedding_input)
