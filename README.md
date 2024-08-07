@@ -1,4 +1,4 @@
-# Kubernetes Documentation Assistant using LLM
+# Kubernetes Documentation Assistant using RAG
 
 - "concepts": 144개
 - "contribute": 32개
