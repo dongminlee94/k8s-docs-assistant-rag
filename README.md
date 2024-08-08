@@ -1,4 +1,4 @@
-# Kubernetes Documentation Assistant using RAG
+# Kubernetes Documentation Assistant with RAG
 
 - concepts: 144
 - contribute: 32
