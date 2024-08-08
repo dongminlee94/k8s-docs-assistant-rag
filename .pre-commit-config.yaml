@@ -6,8 +6,9 @@ repos:
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: end-of-file-fixer
-      - id: trailing-whitespace
       - id: mixed-line-ending
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
 
   - repo: local
     hooks:
