@@ -1,0 +1,9 @@
+services:
+  vector-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.vector_db
+    container_name: vector-db
+    command: python src/vector_db/main.py
+    volumes:
+    - ./data:/usr/app/data

@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+WORKDIR /usr/app
+
+COPY requirements.txt .
+
+RUN pip install -U pip &&\
+    pip install -r requirements.txt
+
+COPY env/ env/
+COPY src/ src/
+COPY prompt/ prompt/
