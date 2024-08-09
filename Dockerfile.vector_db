@@ -8,5 +8,5 @@ RUN pip install -U pip &&\
     pip install -r requirements.txt
 
 COPY env/ env/
-COPY src/ src/
 COPY prompt/ prompt/
+COPY src/vector_db/ src/vector_db/
