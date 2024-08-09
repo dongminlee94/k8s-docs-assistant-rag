@@ -90,11 +90,7 @@ class K8sDocsCrawler:
         for a_tag in soup.find_all("a", href=True):
             href = a_tag["href"]
 
-            if (
-                href.startswith("/docs/")
-                and not href.endswith("/home/")
-                and href.split("/")[2] in self._target_subdirs
-            ):
+            if href.startswith("/docs/") and href.split("/")[2] in self._target_subdirs:
                 urls.append(self._base_url + href)
 
         return list(set(urls))

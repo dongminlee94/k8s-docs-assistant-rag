@@ -61,13 +61,3 @@ class PromptTemplate:
             for message in self._prompt_template
             for role, template in message.items()
         ]
-
-
-if __name__ == "__main__":
-    prompt_name = "summary"
-    prompt_template = PromptTemplate(prompt_name=prompt_name)
-
-    parameters = {"text": "안녕?"}
-    messages = prompt_template.format(parameters=parameters)
-
-    print(messages)
