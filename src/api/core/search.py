@@ -11,7 +11,7 @@ from client import OpenAIClient
 class SimilaritySearch:
     """Similarity Search.
 
-    This class provides functionality to perform similarity searches using precomputed embeddings and FAISS.
+    This class provides functionality to perform similarity searches using precomputed embeddings and Faiss.
     """
 
     def __init__(self, api_key: str) -> None:
@@ -26,9 +26,9 @@ class SimilaritySearch:
         self._index = self._get_index()
 
     def _get_index(self) -> faiss.IndexIDMap:
-        """Create a FAISS index from the loaded vector database.
+        """Create a Faiss index from the loaded vector database.
 
-        :returns: A FAISS index mapped with IDs for similarity search.
+        :returns: A Faiss index mapped with IDs for similarity search.
         """
         embedding = np.array(list(self._vector_db["embedding_output"]))
 
