@@ -30,7 +30,7 @@ class SimilaritySearch:
 
         :returns: A FAISS index mapped with IDs for similarity search.
         """
-        embedding = np.array(self._vector_db["embedding_output"].to_list())
+        embedding = np.array(list(self._vector_db["embedding_output"]))
 
         index = faiss.IndexIDMap(faiss.IndexFlatIP(embedding.shape[1]))
         index.add_with_ids(embedding, np.array(range(0, len(self._vector_db))))
