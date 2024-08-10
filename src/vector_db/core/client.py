@@ -22,6 +22,14 @@ class OpenAIClient:
         :param text: The input text to be embedded.
         :param model: The name of the model to be used for embedding.
         :returns: A list of floats representing the embedding of the input text.
+
+        Example:
+            >>> client = OpenAIClient(api_key="your_api_key")
+            >>> text = "This is a sample text to embed."
+            >>> model = "text-embedding-3-large"
+            >>> embedding = client.create_embedding(text=text, model=model)
+            >>> print(embedding)
+            [0.12345, 0.67890, ...]  # List of float values representing the embedding
         """
         return self._client.embeddings.create(input=text, model=model).data[0].embedding
 
@@ -40,6 +48,17 @@ class OpenAIClient:
         :param temperature: The temperature value for sampling; higher values make the output more random.
         :returns: The content of the generated completion.
         :raises Exception: If the response does not contain exactly one choice.
+
+        Example:
+            >>> client = OpenAIClient(api_key="your_api_key")
+            >>> messages = [
+            ...     {"role": "system", "content": "You are an assistant."},
+            ...     {"role": "user", "content": "Tell me a joke."}
+            ... ]
+            >>> model = "gpt-4o-mini"
+            >>> response = client.create_completion(messages=messages, model=model, temperature=0.7)
+            >>> print(response)
+            "Why don't scientists trust atoms? Because they make up everything!"
         """
         response_format = response_format if response_format else {}
 
