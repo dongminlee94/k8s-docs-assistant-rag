@@ -5,7 +5,6 @@ import os
 import pandas as pd
 import tiktoken
 from core.client import OpenAIClient
-from core.util import make_chunks
 from tqdm import tqdm
 
 
@@ -15,23 +14,67 @@ class DocsEmbedder:
     This class is used to embed documentation content using OpenAI's embedding models.
     """
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, target_subdirs: list[str]) -> None:
         """
         Initialize the DocsEmbedder.
 
         :param api_key: The API key to authenticate with the OpenAI service.
+        :param target_subdirs: List of target subdirectories to process.
         """
         self._openai_client = OpenAIClient(api_key=api_key)
-        self._input_path = os.path.join(os.path.dirname(__file__), "../../..", "data/summary.parquet")
+        self._target_subdirs = target_subdirs
+
+        self._input_dir = os.path.join(os.path.dirname(__file__), "../../..", "data/docs")
         self._output_path = os.path.join(os.path.dirname(__file__), "../../..", "data/vector_db.parquet")
+
         self._base_columns = [
             "title",
             "url",
             "content",
-            "summary",
             "embedding_input",
             "embedding_output",
         ]
+
+    def _read_docs(self, embedded_urls: set[str]) -> pd.DataFrame:
+        """Read and filter documentation files from the target subdirectories.
+
+        :param embedded_urls: A set of URLs that have already been embedded.
+        :returns: A DataFrame containing the unembedded documentation data.
+        :note: This method reads all JSON files from the specified input directory, filters out the ones that
+               have already been embedded (based on their URLs), and returns the remaining data.
+        """
+        dfs = []
+
+        def __read_docs(input_dir: str) -> pd.DataFrame:
+            for entry in os.scandir(input_dir):
+                if entry.is_dir() and entry.name in self._target_subdirs:
+                    __read_docs(entry.path)
+                elif entry.is_file():
+                    df = pd.read_json(entry.path)
+
+                    if df["url"].item() not in embedded_urls:
+                        dfs.append(df)
+
+            return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+
+        return __read_docs(input_dir=self._input_dir)
+
+    @staticmethod
+    def _make_chunks(data: str | list[int], length: int) -> list[str]:
+        """
+        Split the data into chunks of the specified length.
+
+        :param data: The data to be split (either a string or a list of tokens).
+        :param length: The length of each chunk.
+        :returns: A list of chunks.
+
+        Example:
+            >>> data = "This is a sample text to be chunked."
+            >>> chunks = DocsEmbedder.make_chunks(data=data, length=10)
+            >>> print(chunks)
+            ['This is a ', 'sample tex', 't to be c', 'hunked.']
+        """
+        return [data[i : i + length] for i in range(0, len(data), length)]
 
     def _get_embedding_input(self, model: str, max_tokens: int) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
@@ -50,7 +93,7 @@ class DocsEmbedder:
             embedded_df = pd.DataFrame(columns=self._base_columns[:-2])
             embedded_urls = set()
 
-        unembedded_df = pd.read_parquet(self._input_path)
+        unembedded_df = self._read_docs(embedded_urls=embedded_urls)
         unembedded_df["embedding_input"] = unembedded_df["title"] + " " + unembedded_df["content"]
 
         encoder = tiktoken.encoding_for_model(model_name=model)
@@ -62,7 +105,7 @@ class DocsEmbedder:
 
             tokens = encoder.encode(text=row.embedding_input)
 
-            for chunk in make_chunks(data=tokens, length=max_tokens):
+            for chunk in self._make_chunks(data=tokens, length=max_tokens):
                 text = encoder.decode(tokens=chunk)
 
                 rows.append(
@@ -70,7 +113,6 @@ class DocsEmbedder:
                         "title": row.title,
                         "url": row.url,
                         "content": row.content,
-                        "summary": row.summary,
                         "embedding_input": text,
                         "embedding_output": None,
                     },
@@ -81,18 +123,15 @@ class DocsEmbedder:
     def _get_embedding_output(
         self,
         model: str,
-        embedded_df: pd.DataFrame,
         unembedded_df: pd.DataFrame,
         verbose: bool = False,
     ) -> pd.DataFrame:
-        """
-        Generate embeddings for the unembedded input using the specified model and combine with embedded data.
+        """Generate embeddings for the unembedded input using the specified model.
 
         :param model: The name of the embedding model to use.
-        :param embedded_df: DataFrame containing already embedded data.
         :param unembedded_df: DataFrame containing data to be embedded.
         :param verbose: Whether to display progress.
-        :returns: A combined DataFrame with the new embeddings added to the existing embeddings.
+        :returns: A DataFrame with the new embeddings.
         """
         print(f"The number of rows in the DataFrame to embed: {len(unembedded_df)}")
 
@@ -100,7 +139,7 @@ class DocsEmbedder:
             embedding_output = self._openai_client.create_embedding(text=row.embedding_input, model=model)
             unembedded_df.loc[row.Index, "embedding_output"] = embedding_output
 
-        return pd.concat([embedded_df, unembedded_df], ignore_index=True)
+        return unembedded_df
 
     def embed_docs(
         self,
@@ -121,8 +160,9 @@ class DocsEmbedder:
             >>> embedder.embed_docs(model="text-embedding-3-large", max_tokens=8192, verbose=True)
         """
         embedded_df, unembedded_df = self._get_embedding_input(model=model, max_tokens=max_tokens)
-        vector_db_df = self._get_embedding_output(
+        new_embedded_df = self._get_embedding_output(
             embedded_df=embedded_df, unembedded_df=unembedded_df, model=model, verbose=verbose
         )
 
+        vector_db_df = pd.concat([embedded_df, new_embedded_df], ignore_index=True)
         vector_db_df.to_parquet(path=self._output_path, index=False)
