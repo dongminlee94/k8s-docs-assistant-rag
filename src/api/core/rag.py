@@ -161,8 +161,8 @@ if __name__ == "__main__":
     prompt_name = "helper"
     rag = DocsRAG(api_key=api_key, prompt_name=prompt_name)
 
-    text = "쿠버네티스에서 대형 클러스터에 대한 고려 사항으로는 어떤 것들이 있니?"
-    # text = "카프카에 대해 알려줘."
+    # text = "쿠버네티스에서 대형 클러스터에 대한 고려 사항으로는 어떤 것들이 있니?"
+    text = "카프카에 대해 알려줘."
     # text = "쿠버네티스가 뭐야?"
     # text = "바보가 뭐야?"
 
@@ -181,8 +181,6 @@ if __name__ == "__main__":
 
     search_df = rag.get_similarity_search(text=text, model=embedding_model)
 
-    response = rag.create_chat_response(
-        search_df=search_df, text=text, model=completion_model, context_window=completion_context_window
-    )
+    response = rag.create_chat_response(search_df=search_df, text=text, model=completion_model)
 
     print(response)
