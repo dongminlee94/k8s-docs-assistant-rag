@@ -35,7 +35,7 @@ class OpenAIClient:
 
     def create_completion(
         self,
-        messages: str | list[dict[str, str]],
+        messages: list[dict[str, str]],
         model: str,
         response_format: dict[str, str] | None = None,
         temperature: int = 0,
