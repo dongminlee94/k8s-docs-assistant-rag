@@ -10,8 +10,8 @@ URL = "https://kubernetes.io/docs/home"
 # Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["home", "setup", "test"]
 
-EMBEDDER_MODEL = "text-embedding-3-large"
-EMBEDDER_MAX_TOKENS = 8192
+EMBEDDING_MODEL = "text-embedding-3-large"
+EMBEDDING_MAX_TOKENS = 8192
 
 
 def get_api_key() -> str:
@@ -52,7 +52,7 @@ def embed_docs() -> None:
     api_key = get_api_key()
 
     embedder = DocsEmbedder(api_key=api_key, target_subdirs=TARGET_SUBDIRS)
-    embedder.embed_docs(model=EMBEDDER_MODEL, max_tokens=EMBEDDER_MAX_TOKENS, verbose=True)
+    embedder.embed_docs(model=EMBEDDING_MODEL, max_tokens=EMBEDDING_MAX_TOKENS, verbose=True)
 
 
 def main() -> None:
@@ -62,11 +62,11 @@ def main() -> None:
     """
     print("Start to create a vector DB\n")
 
-    print("Step 1: Crawl the documentations")
+    print("Step 1: Crawl the documentation")
     crawl_docs()
     print("The Crawling process completed\n")
 
-    print("Step 2: Embed the documentations")
+    print("Step 2: Embed the documentation")
     embed_docs()
     print("The Embedding process completed\n")
 

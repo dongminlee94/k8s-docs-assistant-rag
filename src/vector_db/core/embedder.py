@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 class DocsEmbedder:
-    """Documentations Embedder.
+    """Documentation Embedder.
 
     This class is used to embed documentation content using OpenAI's embedding models.
     """
