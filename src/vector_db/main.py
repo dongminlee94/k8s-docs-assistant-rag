@@ -66,7 +66,7 @@ def main() -> None:
     crawl_docs()
     print("The Crawling process completed\n")
 
-    print("Step 2: Embed the documentations")
+    print("Step 2: Embed the documentation")
     embed_docs()
     print("The Embedding process completed\n")
 
