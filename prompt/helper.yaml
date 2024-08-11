@@ -16,8 +16,8 @@ template:
     규칙6. 한국어로 답변해줘.
 - - "user"
   - |
-    --- REQUEST ---
-    {request}
+    --- QUESTION ---
+    {question}
 - - "system"
   - |
     --- ANSWER ---
