@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 
 class DocsSummarizer:
-    """Documentations Summarizer."""
+    """Documentation Summarizer."""
 
     def __init__(
         self,

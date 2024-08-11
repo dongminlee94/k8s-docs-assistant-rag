@@ -10,7 +10,7 @@ URL = "https://kubernetes.io/docs/home"
 
 # Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["home", "setup", "test"]
-SUMMARIZER_PROMPT_NAME = "summary"
+SUMMARIZER_PROMPT_NAME = "summarizer"
 SUMMARIZER_MODEL = "gpt-4o-mini"
 SUMMARIZER_CONTEXT_WINDOW = 128000
 
@@ -83,15 +83,15 @@ def main() -> None:
     """
     print("Start to create a vector DB\n")
 
-    print("Step 1: Crawl the documentations")
+    print("Step 1: Crawl the documentation")
     crawl_docs()
     print("The Crawling process completed\n")
 
-    print("Step 2: Summarize the documentations")
+    print("Step 2: Summarize the documentation")
     summarize_docs()
     print("The Summarizing process completed\n")
 
-    print("Step 3: Embed the documentations")
+    print("Step 3: Embed the documentation")
     embed_docs()
     print("The Embedding process completed\n")
 
