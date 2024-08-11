@@ -1,18 +1,14 @@
-"""Vector DB."""
+"""Vector DB main function."""
 
 import os
 
 from core.crawler import K8sDocsCrawler
 from core.embedder import DocsEmbedder
-from core.summarizer import DocsSummarizer
 
 URL = "https://kubernetes.io/docs/home"
 
 # Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["home", "setup", "test"]
-SUMMARIZER_PROMPT_NAME = "summary"
-SUMMARIZER_MODEL = "gpt-4o-mini"
-SUMMARIZER_CONTEXT_WINDOW = 128000
 
 EMBEDDER_MODEL = "text-embedding-3-large"
 EMBEDDER_MAX_TOKENS = 8192
@@ -47,39 +43,22 @@ def crawl_docs() -> None:
         raise
 
 
-def summarize_docs() -> None:
-    """Summarize the crawled documentation.
-
-    This function initializes the DocsSummarizer, reads the crawled documents,
-    and generates summaries for each document.
-    """
-    api_key = get_api_key()
-
-    summarizer = DocsSummarizer(
-        target_subdirs=TARGET_SUBDIRS,
-        api_key=api_key,
-        prompt_name=SUMMARIZER_PROMPT_NAME,
-    )
-    summarizer.summarize_docs(model=SUMMARIZER_MODEL, context_window=SUMMARIZER_CONTEXT_WINDOW, verbose=True)
-
-
 def embed_docs() -> None:
-    """Embed the summarized documentation.
+    """Embed the crawled documentation content.
 
-    This function initializes the DocsEmbedder, reads the summarized documents,
-    and generates embeddings for each document.
+    This function initializes the DocsEmbedder with the API key and target subdirectories,
+    and then processes the documentation to generate and save embeddings using the specified model.
     """
     api_key = get_api_key()
 
-    embedder = DocsEmbedder(api_key=api_key)
+    embedder = DocsEmbedder(api_key=api_key, target_subdirs=TARGET_SUBDIRS)
     embedder.embed_docs(model=EMBEDDER_MODEL, max_tokens=EMBEDDER_MAX_TOKENS, verbose=True)
 
 
 def main() -> None:
     """Main function to run the documentation processing pipeline.
 
-    This function orchestrates the crawling, summarizing, and embedding of
-    the Kubernetes documentation.
+    This function orchestrates the crawling and embedding of the Kubernetes documentation.
     """
     print("Start to create a vector DB\n")
 
@@ -87,11 +66,7 @@ def main() -> None:
     crawl_docs()
     print("The Crawling process completed\n")
 
-    print("Step 2: Summarize the documentations")
-    summarize_docs()
-    print("The Summarizing process completed\n")
-
-    print("Step 3: Embed the documentations")
+    print("Step 2: Embed the documentations")
     embed_docs()
     print("The Embedding process completed\n")
 
