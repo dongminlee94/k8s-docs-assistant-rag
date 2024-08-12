@@ -1,5 +1,6 @@
 beautifulsoup4==4.12.3
 faiss-cpu==1.8.0.post1
+fastapi[standard]==0.112.0
 fastparquet==2024.5.0
 openai==1.38.0
 pandas==2.2.2
