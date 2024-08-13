@@ -18,7 +18,7 @@ lint:
 	flake8 . --max-line-length 110 --extend-ignore E203
 
 up:
-	docker compose up --build -d
+	docker compose up -d
 
 down:
 	docker compose down -v
