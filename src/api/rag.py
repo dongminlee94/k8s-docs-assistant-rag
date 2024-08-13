@@ -27,7 +27,7 @@ class DocsRAG:
         self._prompt_name = prompt_name
 
         self._vector_db = pd.read_parquet(
-            os.path.join(os.path.dirname(__file__), "../../..", "data/vector_db.parquet")
+            os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
         )
         self._index = self._get_index()
 
@@ -65,7 +65,7 @@ class DocsRAG:
             # Output: [{'role': 'system', 'content': 'You are an assistant.'}, ...] # Reset to initial state
         """
         prompt_file_path = os.path.join(
-            os.path.dirname(__file__), "../../..", "prompt", f"{self._prompt_name}.yaml"
+            os.path.dirname(__file__), "../..", "prompt", f"{self._prompt_name}.yaml"
         )
 
         with open(prompt_file_path, "r", encoding="utf-8") as file:
@@ -188,69 +188,3 @@ class DocsRAG:
         self.chat.append({"role": "assistant", "content": response})
 
         return response
-
-
-if __name__ == "__main__":
-    with open(os.path.join(os.path.dirname(__file__), "../../..", "env/api_key.env"), "r") as file:
-        api_key = file.read().strip()
-
-    prompt_name = "helper"
-    rag = DocsRAG(api_key=api_key, prompt_name=prompt_name)
-
-    text = "쿠버네티스에서 대형 클러스터에 대한 고려 사항으로는 어떤 것들이 있니?"
-    # text = "카프카에 대해 알려줘."
-    # text = "쿠버네티스가 뭐야?"
-    # text = "바보가 뭐야?"
-
-    embedding_model = "text-embedding-3-large"
-    embedding_max_tokens = 8192
-    completion_model = "gpt-4o-mini"
-    completion_context_window = 128000
-
-    rag.check_token_limit(
-        text=text,
-        embedding_model=embedding_model,
-        embedding_max_tokens=embedding_max_tokens,
-        completion_model=completion_model,
-        completion_context_window=completion_context_window,
-    )
-
-    search_df = rag.get_similarity_search(text=text, model=embedding_model)
-
-    response = rag.create_chat_response(search_df=search_df, text=text, model=completion_model)
-
-    print("===" * 30)
-    print(response)
-    print()
-
-    text = "답변해줘서 고마워. 그런데 애드온 리소스가 뭐야?"
-
-    search_df = rag.get_similarity_search(text=text, model=embedding_model)
-
-    response = rag.create_chat_response(search_df=search_df, text=text, model=completion_model)
-
-    print("===" * 30)
-    print(response)
-    print()
-
-    text = "내가 지금까지 질문했던 내용을 다시 말해줘."
-
-    search_df = rag.get_similarity_search(text=text, model=embedding_model)
-
-    response = rag.create_chat_response(search_df=search_df, text=text, model=completion_model)
-
-    print("===" * 30)
-    print(response)
-    print()
-
-    rag.clear_chat_history()
-
-    text = "내가 지금까지 질문했던 내용을 다시 말해줘."
-
-    search_df = rag.get_similarity_search(text=text, model=embedding_model)
-
-    response = rag.create_chat_response(search_df=search_df, text=text, model=completion_model)
-
-    print("===" * 30)
-    print(response)
-    print()
