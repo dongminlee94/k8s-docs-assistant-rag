@@ -1,6 +1,7 @@
 """Retrieval-Augmented Generation (RAG)."""
 
 import os
+import time
 
 import faiss
 import numpy as np
@@ -26,12 +27,23 @@ class DocsRAG:
         self._openai_client = OpenAIClient(api_key=api_key)
         self._prompt_name = prompt_name
 
-        self._vector_db = pd.read_parquet(
-            os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
-        )
+        self._vector_db = self._get_vector_db()
         self._index = self._get_index()
 
         self.clear_chat_history()
+
+    def _get_vector_db(self) -> pd.DataFrame:
+        """Retrieve the vector database from a parquet file.
+
+        :returns: A pandas DataFrame containing the vector database.
+        """
+        file_path = os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
+
+        while not os.path.exists(file_path):
+            print("The vector_db.parquet file is not found. Please wait while it is being created...")
+            time.sleep(10)
+
+        return pd.read_parquet(file_path)
 
     def _get_index(self) -> faiss.IndexIDMap:
         """Create and return the Faiss index for efficient similarity search.
