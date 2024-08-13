@@ -4,7 +4,6 @@ import json
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any
 
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter, Retry
@@ -175,7 +174,7 @@ class K8sDocsCrawler:
 
     def create_all_docs(
         self, urls: list[str], max_workers: int = 200, verbose: bool = False
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, str | bool | None]]:
         """
         Create JSON documentation files for all provided URLs.
 
