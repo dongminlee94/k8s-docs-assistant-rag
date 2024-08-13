@@ -4,6 +4,23 @@ services:
       context: .
       dockerfile: Dockerfile.vector_db
     container_name: vector-db
+    env_file:
+      - .env
     command: python src/vector_db/main.py
     volumes:
-    - ./data:/usr/app/data
+      - ./data:/usr/app/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: api
+    depends_on:
+      - vector-db
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./data:/usr/app/data
