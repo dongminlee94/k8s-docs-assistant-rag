@@ -150,7 +150,7 @@ class DocsRAG:
         model: str,
         response_format: dict[str, str] = {"type": "text"},
         temperature: int = 0,
-    ):
+    ) -> str:
         """Generate a response using the language model based on the retrieved documents.
 
         :param search_df: A DataFrame containing the retrieved documents.

@@ -39,7 +39,7 @@ class OpenAIClient:
         model: str,
         response_format: dict[str, str] | None = None,
         temperature: int = 0,
-    ) -> str | None:
+    ) -> str:
         """Create a completion for the given messages using the specified model.
 
         :param messages: A single message or a list of message dictionaries to generate the completion.
