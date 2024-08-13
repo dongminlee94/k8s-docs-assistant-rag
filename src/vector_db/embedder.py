@@ -4,7 +4,7 @@ import os
 
 import pandas as pd
 import tiktoken
-from core.client import OpenAIClient
+from openai import OpenAI
 from tqdm import tqdm
 
 
@@ -21,7 +21,7 @@ class DocsEmbedder:
         :param api_key: The API key to authenticate with the OpenAI service.
         :param target_subdirs: List of target subdirectories to process.
         """
-        self._openai_client = OpenAIClient(api_key=api_key)
+        self._openai_client = OpenAI(api_key=api_key)
         self._target_subdirs = target_subdirs
 
         self._input_dir = os.path.join(os.path.dirname(__file__), "../../..", "data/docs")
@@ -136,7 +136,11 @@ class DocsEmbedder:
         print(f"The number of rows in the DataFrame to embed: {len(unembedded_df)}")
 
         for row in tqdm(unembedded_df.itertuples()) if verbose else unembedded_df.itertuples():
-            embedding_output = self._openai_client.create_embedding(text=row.embedding_input, model=model)
+            embedding_output = (
+                self._openai_client.embeddings.create(input=row.embedding_input, model=model)
+                .data[0]
+                .embedding
+            )
             unembedded_df.loc[row.Index, "embedding_output"] = embedding_output
 
         return unembedded_df

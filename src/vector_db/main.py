@@ -2,8 +2,8 @@
 
 import os
 
-from core.crawler import K8sDocsCrawler
-from core.embedder import DocsEmbedder
+from crawler import K8sDocsCrawler
+from embedder import DocsEmbedder
 
 URL = "https://kubernetes.io/docs/home"
 
