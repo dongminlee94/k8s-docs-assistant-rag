@@ -5,6 +5,7 @@ import os
 from fastapi import Body, FastAPI, HTTPException
 from rag import DocsRAG
 
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PROMPT_NAME = "helper"
 
 EMBEDDING_MODEL = "text-embedding-3-large"
@@ -13,11 +14,7 @@ COMPLETION_MODEL = "gpt-4o-mini"
 COMPLETION_CONTEXT_WINDOW = 128000
 
 
-with open(os.path.join(os.path.dirname(__file__), "../..", "env/api_key.env"), "r") as file:
-    api_key = file.read().strip()
-
-rag = DocsRAG(api_key=api_key, prompt_name=PROMPT_NAME)
-
+rag = DocsRAG(api_key=OPENAI_API_KEY, prompt_name=PROMPT_NAME)
 app = FastAPI()
 
 

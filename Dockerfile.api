@@ -7,4 +7,7 @@ COPY requirements.txt .
 RUN pip install -U pip &&\
     pip install -r requirements.txt
 
-COPY src/vector_db/ src/vector_db/
+COPY prompt/ prompt/
+COPY src/api/ src/api/
+
+WORKDIR /usr/app/src/api
