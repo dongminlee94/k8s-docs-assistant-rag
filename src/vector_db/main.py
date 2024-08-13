@@ -10,19 +10,9 @@ URL = "https://kubernetes.io/docs/home"
 # Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["home", "setup", "test"]
 
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 EMBEDDING_MODEL = "text-embedding-3-large"
 EMBEDDING_MAX_TOKENS = 8192
-
-
-def get_api_key() -> str:
-    """Retrieve the API key from the environment file.
-
-    :returns: The API key as a string.
-    """
-    with open(os.path.join(os.path.dirname(__file__), "../..", "env/api_key.env"), "r") as file:
-        api_key = file.read().strip()
-
-    return api_key
 
 
 def crawl_docs() -> None:
@@ -49,9 +39,7 @@ def embed_docs() -> None:
     This function initializes the DocsEmbedder with the API key and target subdirectories,
     and then processes the documentation to generate and save embeddings using the specified model.
     """
-    api_key = get_api_key()
-
-    embedder = DocsEmbedder(api_key=api_key, target_subdirs=TARGET_SUBDIRS)
+    embedder = DocsEmbedder(api_key=OPENAI_API_KEY, target_subdirs=TARGET_SUBDIRS)
     embedder.embed_docs(model=EMBEDDING_MODEL, max_tokens=EMBEDDING_MAX_TOKENS, verbose=True)
 
 
