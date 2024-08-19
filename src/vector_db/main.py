@@ -8,7 +8,7 @@ from embedder import DocsEmbedder
 URL = "https://kubernetes.io/docs/home"
 
 # Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
-TARGET_SUBDIRS = ["home", "setup", "test"]
+TARGET_SUBDIRS = ["contribute", "home", "setup", "test", "tutorials"]
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 EMBEDDING_MODEL = "text-embedding-3-large"
