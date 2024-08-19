@@ -63,3 +63,12 @@ async def clear() -> dict[str, str]:
     """
     rag.clear_chat_history()
     return {"message": "Chat history cleared."}
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Simple health check endpoint.
+
+    :returns: A dictionary indicating the health status of the API.
+    """
+    return {"status": "healthy"}

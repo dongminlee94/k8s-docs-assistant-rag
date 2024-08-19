@@ -24,3 +24,20 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./data:/usr/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  interface:
+    build:
+      context: .
+      dockerfile: Dockerfile.interface
+    container_name: interface
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - 9000:9000
+    command: streamlit run src/interface/main.py --server.port 9000
