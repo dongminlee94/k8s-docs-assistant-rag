@@ -22,3 +22,6 @@ up:
 
 down:
 	docker compose down -v
+
+rmi:
+	docker rmi k8s-docs-assistant-rag-vector-db k8s-docs-assistant-rag-api k8s-docs-assistant-rag-interface
