@@ -1,7 +1,11 @@
 """Interface main function."""
 
-import requests
 import streamlit as st
+from requester import requests_retry_session
+
+API_CHAT_URL = "http://api:8000/chat"
+API_CLEAR_URL = "http://api:8000/clear"
+
 
 # Apply custom CSS for title font size
 st.markdown(
@@ -31,15 +35,18 @@ for message in st.session_state.messages:
         st.markdown(message["content"], unsafe_allow_html=True)
 
 # Handle new user input
-if prompt := st.chat_input("How may I help you?"):
-    # Store the user input in the session state and display it in the chat
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if content := st.chat_input("How may I help you?"):
+    # Store the user input in the session state
+    st.session_state.messages.append({"role": "user", "content": content})
+
+    # Display the user input in the chat
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(content)
 
     # Get response from the API and display it
     with st.chat_message("assistant"):
-        response = requests.post("http://api:8000/chat", json={"text": prompt})
+        response = requests_retry_session().post(url=API_CHAT_URL, json={"content": content})
+
         response_text = response.text.strip('"')
         response_text = response_text.replace("\\n", "\n")
         response_text = response_text.replace("**질문**", "**질문**\n")
@@ -51,6 +58,6 @@ if prompt := st.chat_input("How may I help you?"):
 
 # Clear chat history when the Clear button is pressed
 if st.button("Clear"):
+    requests_retry_session().post(url=API_CLEAR_URL)
     st.session_state.messages = []
-    requests.post("http://api:8000/clear")
     st.rerun()
