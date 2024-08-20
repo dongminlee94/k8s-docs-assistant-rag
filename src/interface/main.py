@@ -21,7 +21,6 @@ st.markdown(
 # Display the main title
 st.title("Kubernetes Documentation Assistant")
 
-
 # Initialize the session state for messages if it doesn't exist
 if "messages" not in st.session_state:
     st.session_state.messages = []
