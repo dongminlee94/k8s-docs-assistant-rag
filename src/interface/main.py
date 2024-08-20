@@ -10,6 +10,12 @@ st.markdown(
     h1 {
         font-size: 40px;
     }
+    .stButton {
+        text-align: right;
+    }
+    .stButton button {
+        float: right;
+    }
     </style>
     """,
     unsafe_allow_html=True,
