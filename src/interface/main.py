@@ -13,9 +13,6 @@ st.markdown(
     .stButton {
         text-align: right;
     }
-    .stButton button {
-        float: right;
-    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -23,6 +20,7 @@ st.markdown(
 
 # Display the main title
 st.title("Kubernetes Documentation Assistant")
+
 
 # Initialize the session state for messages if it doesn't exist
 if "messages" not in st.session_state:
