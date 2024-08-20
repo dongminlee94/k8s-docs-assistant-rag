@@ -109,7 +109,7 @@ class DocsRAG:
         if not isinstance(prompt, list) or not all(
             isinstance(piece, str) and len(msg) == 2 for msg in prompt for piece in msg
         ):
-            raise ValueError("The prompt must be a list of pairs like [['role', 'content']].")
+            raise ValueError('The prompt must be a list of pairs like [["role", "content"]].')
 
         self.chat = [{"role": msg[0], "content": msg[1]} for msg in prompt]
 
