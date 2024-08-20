@@ -31,7 +31,7 @@ async def chat(request: dict[str, str] = Body(...)) -> str:
 
     :param request: A dictionary containing the input content for generating the response.
                     The dictionary must include a "content" key with a string value.
-    :returns: The generated chat response as a string.
+    :returns response: The generated chat response as a string.
 
     Example:
         To use this endpoint, send a POST request with a JSON body containing the "content" field:

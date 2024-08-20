@@ -129,8 +129,8 @@ class DocsRAG:
         ...     completion_context_window=128000
         ... )
         >>> content = "What are the considerations for large Kubernetes clusters?"
-        >>> result = rag.check_token_limit(content=content)
-        >>> if result:
+        >>> vaild = rag.check_token_limit(content=content)
+        >>> if vaild:
         ...     print("Token limit is within acceptable range.")
         ... else:
         ...     print("Token limit exceeded.")
