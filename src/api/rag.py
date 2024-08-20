@@ -113,12 +113,11 @@ class DocsRAG:
 
         self.chat = [{"role": msg[0], "content": msg[1]} for msg in prompt]
 
-    def check_token_limit(self, content: str) -> dict[str, str | int]:
+    def check_token_limit(self, content: str) -> bool:
         """Check if the current chat history and the new content exceed the token limit for the models.
 
         :param content: The new content to be added to the chat history.
-        :return: A dictionary with the keys "model", "limit", and "token_length"
-                 if the token limit is exceeded.
+        :return: `True` if the token limit is within acceptable range, `False` if exceeded.
 
         Example:
         >>> rag = DocsRAG(
@@ -132,12 +131,9 @@ class DocsRAG:
         >>> content = "What are the considerations for large Kubernetes clusters?"
         >>> result = rag.check_token_limit(content=content)
         >>> if result:
-        ...     print(
-        ...         f"Token limit exceeded for {result['model']}: "
-        ...         f"Limit is {result['limit']}, but got {result['length']}"
-        ...     )
-        ... else:
         ...     print("Token limit is within acceptable range.")
+        ... else:
+        ...     print("Token limit exceeded.")
         """
         contents = "".join([chat["content"] for chat in self.chat])
         contents += content
@@ -150,7 +146,9 @@ class DocsRAG:
             tokens = encoder.encode(text=text)
 
             if len(tokens) > limit:
-                return {"model": model, "limit": limit, "token_length": len(tokens)}
+                return False
+
+        return True
 
     def get_similarity_search(self, content: str, top_k: int = 5) -> pd.DataFrame:
         """Perform a similarity search on the vector database.

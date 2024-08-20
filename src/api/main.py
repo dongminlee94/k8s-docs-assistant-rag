@@ -46,15 +46,12 @@ async def chat(request: dict[str, str] = Body(...)) -> str:
         if not content:
             raise HTTPException(status_code=400, detail='"content" field is required.')
 
-        result = rag.check_token_limit(content=content)
+        valid = rag.check_token_limit(content=content)
 
-        if result:
-            detail = (
-                f'Chat history or input exceeds the token limit for {result["model"]}. '
-                f'Limit: {result["limit"]}, Token Length: {result["token_length"]} '
-                f'Please press the "Clear" button or reduce the input text length.'
+        if not valid:
+            raise HTTPException(
+                status_code=400, detail='Please press the "Clear" button or reduce the input text length.'
             )
-            raise HTTPException(status_code=400, detail=detail)
 
         search_df = rag.get_similarity_search(content=content)
         response = rag.create_chat_response(search_df=search_df, content=content)
