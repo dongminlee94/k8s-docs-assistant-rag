@@ -14,55 +14,59 @@ COMPLETION_MODEL = "gpt-4o-mini"
 COMPLETION_CONTEXT_WINDOW = 128000
 
 
-rag = DocsRAG(api_key=OPENAI_API_KEY, prompt_name=PROMPT_NAME)
+rag = DocsRAG(
+    api_key=OPENAI_API_KEY,
+    prompt_name=PROMPT_NAME,
+    embedding_model=EMBEDDING_MODEL,
+    embedding_max_tokens=EMBEDDING_MAX_TOKENS,
+    completion_model=COMPLETION_MODEL,
+    completion_context_window=COMPLETION_CONTEXT_WINDOW,
+)
 app = FastAPI()
 
 
 @app.post("/chat")
 async def chat(request: dict[str, str] = Body(...)) -> str:
-    """Generate a chat response based on input text using the RAG system.
+    """Generate a chat response based on input content using the RAG system.
 
-    :param request: A dictionary containing the input text for generating the response.
-                    The dictionary must include a 'text' key with a string value.
-    :returns: The generated chat response as a string.
-    :raises HTTPException: If the 'text' field is missing from the request or any processing error occurs.
+    :param request: A dictionary containing the input content for generating the response.
+                    The dictionary must include a "content" key with a string value.
+    :returns response: The generated chat response as a string.
 
     Example:
-        To use this endpoint, send a POST request with a JSON body containing the 'text' field:
+        To use this endpoint, send a POST request with a JSON body containing the "content" field:
         {
-            "text": "What are the considerations for large Kubernetes clusters?"
+            "content": "What are the considerations for large Kubernetes clusters?"
         }
         The response will be a string generated based on the retrieved documents.
     """
     try:
-        text = request.get("text")
+        content = request.get("content")
 
-        if not text:
-            raise HTTPException(status_code=400, detail="'text' field is required.")
+        if not content:
+            raise HTTPException(status_code=400, detail='"content" field is required.')
 
-        rag.check_token_limit(
-            text=text,
-            embedding_model=EMBEDDING_MODEL,
-            embedding_max_tokens=EMBEDDING_MAX_TOKENS,
-            completion_model=COMPLETION_MODEL,
-            completion_context_window=COMPLETION_CONTEXT_WINDOW,
-        )
+        valid = rag.check_token_limit(content=content)
 
-        search_df = rag.get_similarity_search(text=text, model=EMBEDDING_MODEL)
+        if not valid:
+            detail = (
+                "The length of the text in the chat history or the input text exceeds the token limit. "
+                'Please press the "Clear" button or reduce the input text length.'
+            )
+            raise HTTPException(status_code=400, detail=detail)
 
-        return rag.create_chat_response(search_df=search_df, text=text, model=COMPLETION_MODEL)
+        search_df = rag.get_similarity_search(content=content)
+        response = rag.create_chat_response(search_df=search_df, content=content)
+
+        return response
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/clear")
-async def clear() -> dict[str, str]:
-    """Clear the current chat history.
-
-    :returns: A message confirming that the chat history has been cleared.
-    """
+async def clear() -> None:
+    """Clear the current chat history."""
     rag.clear_chat_history()
-    return {"message": "Chat history cleared."}
 
 
 @app.get("/health")
