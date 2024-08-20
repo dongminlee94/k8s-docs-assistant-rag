@@ -49,9 +49,11 @@ async def chat(request: dict[str, str] = Body(...)) -> str:
         valid = rag.check_token_limit(content=content)
 
         if not valid:
-            raise HTTPException(
-                status_code=400, detail='Please press the "Clear" button or reduce the input text length.'
+            detail = (
+                "The length of the text in the chat history or the input text exceeds the token limit. "
+                'Please press the "Clear" button or reduce the input text length.'
             )
+            raise HTTPException(status_code=400, detail=detail)
 
         search_df = rag.get_similarity_search(content=content)
         response = rag.create_chat_response(search_df=search_df, content=content)
