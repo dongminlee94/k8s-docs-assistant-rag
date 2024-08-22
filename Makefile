@@ -11,11 +11,13 @@ requirements:
 	pip-compile requirements-dev.in
 
 requirements-in-fixer:
-	@files="requirements.in requirements-dev.in"; \
-	for file in $$files; do \
-		if [[ -f $$file ]]; then \
-			sort -f -o $$file $$file; \
-		fi \
+	@for file in requirements.in requirements-dev.in; do \
+		if [ -f "$$file" ]; then \
+			echo "Sorting $$file"; \
+			sort -f -o "$$file" "$$file"; \
+		else \
+			echo "$$file does not exist."; \
+		fi; \
 	done
 
 check:

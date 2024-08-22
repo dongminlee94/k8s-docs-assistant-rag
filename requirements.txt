@@ -46,9 +46,9 @@ email-validator==2.2.0
     # via fastapi
 faiss-cpu==1.8.0.post1
     # via -r requirements.in
-fastapi-cli[standard]==0.0.5
-    # via -r requirements.in
 fastapi[standard]==0.112.0
+    # via -r requirements.in
+fastapi-cli[standard]==0.0.5
     # via fastapi
 fastparquet==2024.5.0
     # via -r requirements.in
