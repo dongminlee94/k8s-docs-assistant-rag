@@ -6,6 +6,20 @@ setup-dev:
 	pip install -r requirements-dev.txt
 	pre-commit install
 
+requirements:
+	pip-compile requirements.in
+	pip-compile requirements-dev.in
+
+requirements-in-fixer:
+	@for file in requirements.in requirements-dev.in; do \
+		if [ -f "$$file" ]; then \
+			echo "Sorting $$file"; \
+			sort -f -o "$$file" "$$file"; \
+		else \
+			echo "$$file does not exist."; \
+		fi; \
+	done
+
 check:
 	make format
 	make lint
