@@ -6,6 +6,18 @@ setup-dev:
 	pip install -r requirements-dev.txt
 	pre-commit install
 
+requirements:
+	pip-compile requirements.in
+	pip-compile requirements-dev.in
+
+requirements-in-fixer:
+	@files="requirements.in requirements-dev.in"; \
+	for file in $$files; do \
+		if [[ -f $$file ]]; then \
+			sort -f -o $$file $$file; \
+		fi \
+	done
+
 check:
 	make format
 	make lint

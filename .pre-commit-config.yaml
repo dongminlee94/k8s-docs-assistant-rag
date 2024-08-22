@@ -7,8 +7,14 @@ repos:
       - id: check-merge-conflict
       - id: end-of-file-fixer
       - id: mixed-line-ending
-      - id: requirements-txt-fixer
       - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: requirements-in-fixer
+        name: fix requirements.in
+        language: system
+        entry: make requirements-in-fixer
 
   - repo: local
     hooks:
