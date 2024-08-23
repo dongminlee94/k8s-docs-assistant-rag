@@ -1,4 +1,4 @@
-"""Vector DB main function."""
+"""Vector DB main module."""
 
 import os
 
@@ -7,7 +7,6 @@ from embedder import DocsEmbedder
 
 URL = "https://kubernetes.io/docs/home"
 
-# Subdirs: "concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"
 TARGET_SUBDIRS = ["concepts", "contribute", "home", "setup", "tasks", "test", "tutorials"]
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]

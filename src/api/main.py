@@ -1,4 +1,4 @@
-"""API main function."""
+"""API main module."""
 
 import os
 
