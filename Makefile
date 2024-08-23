@@ -31,10 +31,10 @@ format:
 lint:
 	flake8 . --max-line-length 110 --extend-ignore E203
 
-up:
+chat:
 	docker compose up -d
 
-down:
+chat-end:
 	docker compose down -v
 
 rmi:
