@@ -11,10 +11,8 @@ requirements:
 	pip-compile requirements-dev.in
 
 requirements-in-fixer:
-	@for file in requirements.in requirements-dev.in; do \
-		echo "Sorting $$file"; \
-		/usr/bin/sort -f -o "$$file" "$$file"; \
-	done
+	python -c "with open('requirements.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements.in', 'w').writelines(lines)"
+	python -c "with open('requirements-dev.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements-dev.in', 'w').writelines(lines)"
 
 check:
 	make format
