@@ -74,7 +74,7 @@ OPENAI_API_KEY=xxxxx
 To set up the Vector DB, check the following three variables in the [Vector DB main module](src/vector_db/main.py).
 
 ```python
-# Default variables
+# Default values
 TARGET_SUBDOMAINS = ["concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"]
 
 EMBEDDING_MODEL = "text-embedding-3-large"
@@ -92,6 +92,7 @@ EMBEDDING_MAX_TOKENS = 8192
 In the [API main module](src/api/main.py), ensure you check the following four variables:
 
 ```python
+# Default values
 EMBEDDING_MODEL = "text-embedding-3-large"
 EMBEDDING_MAX_TOKENS = 8192
 COMPLETION_MODEL = "gpt-4o-mini"
