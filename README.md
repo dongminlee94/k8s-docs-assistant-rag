@@ -26,7 +26,7 @@ Given the vast amount of documentation, using RAG offers several benefits to mak
 - **Efficiency**: Kumi significantly reduces the time required to find relevant information, offering quick and precise responses to your queries.
 - **Scalability**: Kumi enhances access to a broad range of Kubernetes documentation, supporting a deeper technical understanding.
 
-Currently, Kumi's responses include some Korean, so it's recommended to ask questions in **Korean** for the best results.
+**Currently, Kumi's responses include some Korean, so it's recommended to ask questions in Korean for the best results.**
 
 ## How It Works
 
@@ -61,7 +61,7 @@ To set up the Vector DB and enable Real-time Chat, you'll need an OpenAI API Key
 
 Generate an API Key from [OpenAI API Key](https://platform.openai.com/api-keys).
 
-Create a .env file in this repository and enter the following line with your API Key:
+Create a `.env` file in this repository and enter the following line with your API Key:
 
 ```env
 OPENAI_API_KEY=xxxxx
@@ -118,9 +118,10 @@ To end the chat session with Kumi, use the following command:
 $ make chat-end
 ```
 
-Then, open your web browser and go to localhost:9000 to start chatting with Kumi!
+Then, open your web browser and go to `localhost:9000` to start chatting with Kumi!
 
 <p align="center"><img src="asset/main_screen.png" width="800"></p>
 
 Enjoy your conversation with Kumi and happy exploring!
+
 Thank you for using Kumi.
