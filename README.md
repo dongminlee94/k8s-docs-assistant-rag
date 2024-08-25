@@ -20,7 +20,7 @@ Below is a breakdown of the structure and the number of documents available in e
 
 Given the vast amount of documentation, using RAG offers several benefits to make navigating and understanding these documents more efficient:
 
-- **Up-to-date Information**: Kumi provides highly accurate and reliable responses by relying on the latest Kubernetes document data.
+- **Up-to-date Information**: Kumi provides highly accurate and reliable responses using the latest Kubernetes document data.
 - **Efficiency**: Kumi significantly reduces the time required to find relevant information, offering quick and precise responses to your queries.
 - **Scalability**: Kumi enhances access to a broad range of Kubernetes documentation, supporting a deeper technical understanding.
 
@@ -43,23 +43,23 @@ Kumi operates through two main processes:
 
 ## Installation
 
-설치 방법은 아래와 같습니다.
+이 저장소를 사용하기 위한 설치 방법은 아래와 같습니다.
 
 ```bash
-# user
+# For general users
 $ make setup
 
-# developer
+# For developers
 $ make setup-dev
 ```
 
-## Preparation
+## Prerequisites
 
-Vector DB를 만들고, Real-time Chat을 하기 위해서는 OpenAI API Key가 필요합니다.
+To set up the Vector DB and enable Real-time Chat, you'll need an OpenAI API Key.
 
-[OpenAI API Key](https://platform.openai.com/api-keys)를 통해 API Key를 생성합니다.
+Generate an API Key from [OpenAI API Key](https://platform.openai.com/api-keys).
 
-이 저장소에서 `.env` 파일을 생성하고, `.env` 파일 안에 아래와 같이 입력합니다.
+Create a .env file in this repository and enter the following line with your API Key:
 
 ```env
 OPENAI_API_KEY=xxxxx
@@ -69,24 +69,25 @@ OPENAI_API_KEY=xxxxx
 
 ### 1. Vector DB Setup
 
-Vector DB를 만들기 위해 [Vector DB main module](src/vector_db/main.py)에서 신경써야할 변수는 3가지입니다.
+To set up the Vector DB, check the following three variables in the [Vector DB main module](src/vector_db/main.py).
 
 ```python
-TARGET_SUBDIRS = ["concepts", "contribute", "home", "setup", "tasks", "test", "tutorials"]
+# Default variables
+TARGET_SUBDOMAINS = ["concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"]
 
 EMBEDDING_MODEL = "text-embedding-3-large"
 EMBEDDING_MAX_TOKENS = 8192
 ```
 
-- Target subdirs: target subdirs 리스트를 수정하여 원하는 subdir의 문서 데이터를 추출할 수 있습니다. **모든 subdir을 넣게 되면 약 800개의 문서 데이터를 OpenAI API를 이용하여 임베딩 해야하기 때문에 비용이 조금 발생할 수도 있습니다.**
-- Embedding Model: [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models) 문서를 참고하여 원하는 임베딩 모델을 기입합니다.
-- Embedding Max Tokens: [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models)를 참고하여 해당 임베딩 모델의 max tokens를 기입합니다. 일반적으로 max input에 적힌 숫자에 플러스 1을 하면 됩니다.
+- **Target subdomains**: Modify the list of target subdomains to extract document data from the desired subdomains. **Note: Including all subdomains will result in embedding approximately 800 documents using the OpenAI API, which could incur additional costs.**
+- **Embedding Model**: Refer to the [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models) and specify the embedding model you want to use.
+- **Embedding Max Tokens**: Check the [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models) to find the maximum tokens for the chosen embedding model. Generally, it is the number listed under max input plus one.
 
-변경이 끝났으면 코드를 반드시 저장해주세요.
+**Ensure you save your changes to the code after modifying these variables.**
 
 ### 2. API Setup
 
-[API main module](src/api/main.py)에서 신경써야할 변수는 4가지입니다.
+In the [API main module](src/api/main.py), ensure you check the following four variables:
 
 ```python
 EMBEDDING_MODEL = "text-embedding-3-large"
@@ -95,17 +96,26 @@ COMPLETION_MODEL = "gpt-4o-mini"
 COMPLETION_CONTEXT_WINDOW = 128000
 ```
 
-- Embedding Model: Vector DB Setup과 동일합니다.
-- Embedding Max Tokens: Vector DB Setup과 동일합니다.
-- Completion Model: [OpenAI Models](https://platform.openai.com/docs/models) 문서를 참고하여 원하는 Chat Completion 모델을 기입합니다.
-- Completion Context Window: [OpenAI Models](https://platform.openai.com/docs/models) 문서를 참고하여 해당 모델의 context window를 기입합니다.
+- **Embedding Model**: Same as in the Vector DB Setup.
+- **Embedding Max Tokens**: Same as in the Vector DB Setup.
+- **Completion Model**: Refer to the [OpenAI Models](https://platform.openai.com/docs/models) to choose your preferred Chat Completion model.
+- **Completion Context Window**: Refer to the [OpenAI Models](https://platform.openai.com/docs/models) to find the context window for the selected model.
 
 ### 3. Real-time Chat with Kumi
+
+To start a chat session with Kumi, enter the following command:
 
 ```bash
 $ make chat
 ```
 
+To end the chat session with Kumi, use the following command:
+
 ```bash
 $ make chat-end
 ```
+
+Then, open your web browser and go to localhost:9000 to start chatting with Kumi!
+
+Enjoy your conversation with Kumi and happy exploring!
+Thank you for using Kumi.
