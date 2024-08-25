@@ -1,6 +1,6 @@
 # Kumi: Kubernetes Documentation Assistant with RAG
 
-<p align="center"><img src="asset/landscape.png" width="800"></p>
+<p align="center"><img src="asset/demo.gif" width="800"></p>
 
 ## Introduction
 
@@ -45,7 +45,7 @@ Kumi operates through two main processes:
 
 ## Installation
 
-이 저장소를 사용하기 위한 설치 방법은 아래와 같습니다.
+Follow the commands below to install and use this repository:
 
 ```bash
 # For general users
@@ -118,6 +118,8 @@ $ make chat-end
 ```
 
 Then, open your web browser and go to localhost:9000 to start chatting with Kumi!
+
+<p align="center"><img src="asset/main_screen.png" width="800"></p>
 
 Enjoy your conversation with Kumi and happy exploring!
 Thank you for using Kumi.
