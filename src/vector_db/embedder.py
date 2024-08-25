@@ -14,15 +14,15 @@ class DocsEmbedder:
     This class is used to embed documentation content using OpenAI's embedding models.
     """
 
-    def __init__(self, api_key: str, target_subdirs: list[str]) -> None:
+    def __init__(self, api_key: str, target_subdomains: list[str]) -> None:
         """
         Initialize the DocsEmbedder.
 
         :param api_key: The API key to authenticate with the OpenAI service.
-        :param target_subdirs: List of target subdirectories to process.
+        :param target_subdomains: List of target subdomains to process.
         """
         self._openai_client = OpenAI(api_key=api_key)
-        self._target_subdirs = target_subdirs
+        self._target_subdomains = target_subdomains
 
         self._input_dir = os.path.join(os.path.dirname(__file__), "../..", "data/docs")
         self._output_path = os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
@@ -36,7 +36,7 @@ class DocsEmbedder:
         ]
 
     def _read_docs(self, embedded_urls: set[str]) -> pd.DataFrame:
-        """Read and filter documentation files from the target subdirectories.
+        """Read and filter documentation files from the target subdomains.
 
         :param embedded_urls: A set of URLs that have already been embedded.
         :returns: A DataFrame containing the unembedded documentation data.
@@ -47,7 +47,7 @@ class DocsEmbedder:
 
         def __read_docs(input_dir: str) -> pd.DataFrame:
             for entry in os.scandir(input_dir):
-                if entry.is_dir() and entry.name in self._target_subdirs:
+                if entry.is_dir() and entry.name in self._target_subdomains:
                     __read_docs(entry.path)
                 elif entry.is_file():
                     df = pd.read_json(entry.path)

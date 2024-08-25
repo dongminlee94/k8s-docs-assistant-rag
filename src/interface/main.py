@@ -1,4 +1,4 @@
-"""Interface main function."""
+"""Interface main module."""
 
 import streamlit as st
 from requester import requests_retry_session

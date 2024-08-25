@@ -11,14 +11,8 @@ requirements:
 	pip-compile requirements-dev.in
 
 requirements-in-fixer:
-	@for file in requirements.in requirements-dev.in; do \
-		if [ -f "$$file" ]; then \
-			echo "Sorting $$file"; \
-			sort -f -o "$$file" "$$file"; \
-		else \
-			echo "$$file does not exist."; \
-		fi; \
-	done
+	python -c "with open('requirements.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements.in', 'w').writelines(lines)"
+	python -c "with open('requirements-dev.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements-dev.in', 'w').writelines(lines)"
 
 check:
 	make format
@@ -31,10 +25,10 @@ format:
 lint:
 	flake8 . --max-line-length 110 --extend-ignore E203
 
-up:
+chat:
 	docker compose up -d
 
-down:
+chat-end:
 	docker compose down -v
 
 rmi:
