@@ -1,22 +1,24 @@
 # Kumi: Kubernetes Documentation Assistant with RAG
 
+<p align="center"><img src="asset/landscape.png" width="800"></p>
+
 ## Introduction
 
 **Kumi** is a documentation assistant designed to help you efficiently explore and understand Kubernetes documentation using RAG (Retrieval-Augmented Generation) technology.
 With approximately 800 official Kubernetes documents, finding the right information can be time-consuming and challenging.
 Kumi was developed to address this issue.
 
-As of August 2024, the Kubernetes official documentation consists of various subdomains, each containing a different number of documents.
+As of August 2024, [the Kubernetes official documentation](https://kubernetes.io/docs) consists of various subdomains, each containing a different number of documents.
 Below is a breakdown of the structure and the number of documents available in each subdomain:
 
-- https://kubernetes.io/docs/concepts: 154 documents
-- https://kubernetes.io/docs/contribute: 33 documents
-- https://kubernetes.io/docs/home: 1 documents
-- https://kubernetes.io/docs/reference: 309 documents
-- https://kubernetes.io/docs/setup: 24 documents
-- https://kubernetes.io/docs/tasks: 209 documents
-- https://kubernetes.io/docs/test: 1 documents
-- https://kubernetes.io/docs/tutorials: 44 documents
+- [concepts](https://kubernetes.io/docs/concepts): 154 documents
+- [contribute](https://kubernetes.io/docs/contribute): 33 documents
+- [home](https://kubernetes.io/docs/home): 1 documents
+- [reference](https://kubernetes.io/docs/reference): 309 documents
+- [setup](https://kubernetes.io/docs/setup): 24 documents
+- [tasks](https://kubernetes.io/docs/tasks): 209 documents
+- [test](https://kubernetes.io/docs/test): 1 documents
+- [tutorials](https://kubernetes.io/docs/tutorials): 44 documents
 
 Given the vast amount of documentation, using RAG offers several benefits to make navigating and understanding these documents more efficient:
 
