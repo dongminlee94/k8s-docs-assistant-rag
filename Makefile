@@ -35,6 +35,6 @@ rmi:
 	docker rmi k8s-docs-assistant-rag-vector-db k8s-docs-assistant-rag-api k8s-docs-assistant-rag-interface
 
 restart:
-	make down
+	make chat-end
 	make rmi
-	make up
+	make chat

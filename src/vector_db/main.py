@@ -6,7 +6,7 @@ from crawler import K8sDocsCrawler
 from embedder import DocsEmbedder
 
 URL = "https://kubernetes.io/docs/home"
-TARGET_SUBDOMAINS = ["concepts", "contribute", "home", "setup", "tasks", "test", "tutorials"]
+TARGET_SUBDOMAINS = ["home", "setup", "test"]
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 EMBEDDING_MODEL = "text-embedding-3-large"
