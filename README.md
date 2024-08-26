@@ -1,7 +1,5 @@
 # Kumi: Kubernetes Documentation Assistant with RAG
 
-<p align="center"><img src="https://imgur.com/jQ1vSNz.gif" width="800"></p>
-
 ## Introduction
 
 **Kumi** is a documentation assistant designed to help you efficiently explore and understand Kubernetes documentation using RAG (Retrieval-Augmented Generation) technology.
@@ -118,7 +116,7 @@ $ make chat-end
 
 Then, open your web browser and go to `localhost:9000` to start chatting with Kumi!
 
-<p align="center"><img src="https://drive.google.com/uc?export=view&id=15iw7nxXYPe3dsFQSJiT56-U9R-wKLLb3" width="800"></p>
+<p align="center"><img src="asset/main_screen.png" width="800"></p>
 
 Enjoy your conversation with Kumi and happy exploring!
 
