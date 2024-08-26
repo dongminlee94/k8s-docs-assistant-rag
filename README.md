@@ -14,11 +14,11 @@ Below is a breakdown of the structure and the number of documents available in e
 - [concepts](https://kubernetes.io/docs/concepts): 154 documents
 - [contribute](https://kubernetes.io/docs/contribute): 33 documents
 - [home](https://kubernetes.io/docs/home): 1 documents
-- [reference](https://kubernetes.io/docs/reference): 309 documents
+- [reference](https://kubernetes.io/docs/reference): 361 documents
 - [setup](https://kubernetes.io/docs/setup): 24 documents
 - [tasks](https://kubernetes.io/docs/tasks): 209 documents
 - [test](https://kubernetes.io/docs/test): 1 documents
-- [tutorials](https://kubernetes.io/docs/tutorials): 44 documents
+- [tutorials](https://kubernetes.io/docs/tutorials): 45 documents
 
 Given the vast amount of documentation, using RAG offers several benefits to make navigating and understanding these documents more efficient:
 
@@ -26,7 +26,7 @@ Given the vast amount of documentation, using RAG offers several benefits to mak
 - **Efficiency**: Kumi significantly reduces the time required to find relevant information, offering quick and precise responses to your queries.
 - **Scalability**: Kumi enhances access to a broad range of Kubernetes documentation, supporting a deeper technical understanding.
 
-**Currently, Kumi's responses include some Korean, so it's recommended to ask questions in Korean for the best results.**
+**Currently, Kumi's responses include some Korean, so asking questions in Korean is recommended for the best results.**
 
 ## How It Works
 
@@ -74,14 +74,13 @@ OPENAI_API_KEY=xxxxx
 To set up the Vector DB, check the following three variables in the [Vector DB main module](src/vector_db/main.py).
 
 ```python
-# Default values
-TARGET_SUBDOMAINS = ["concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"]
+TARGET_SUBDOMAINS = ["home", "setup", "test"]
 
 EMBEDDING_MODEL = "text-embedding-3-large"
 EMBEDDING_MAX_TOKENS = 8192
 ```
 
-- **Target subdomains**: Modify the list of target subdomains to extract document data from the desired subdomains. **Note: Including all subdomains will result in embedding approximately 800 documents using the OpenAI API, which could incur additional costs.**
+- **Target subdomains**: The full list of subdomains includes `["concepts", "contribute", "home", "reference", "setup", "tasks", "test", "tutorials"]`. By default, only `["home", "setup", "test"]` are selected to reduce the number of documents being embedded, as including all subdomains would result in approximately 800 documents and could lead to higher costs. Modify the list to include your desired subdomains based on your needs. **Note: Adding more subdomains may increase the API usage costs.**
 - **Embedding Model**: Refer to the [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models) and specify the embedding model you want to use.
 - **Embedding Max Tokens**: Check the [OpenAI Embeddings](https://platform.openai.com/docs/guides/embeddings/embedding-models) to find the maximum tokens for the chosen embedding model. Generally, it is the number listed under max input plus one.
 
@@ -92,7 +91,6 @@ EMBEDDING_MAX_TOKENS = 8192
 In the [API main module](src/api/main.py), ensure you check the following four variables:
 
 ```python
-# Default values
 EMBEDDING_MODEL = "text-embedding-3-large"
 EMBEDDING_MAX_TOKENS = 8192
 COMPLETION_MODEL = "gpt-4o-mini"
