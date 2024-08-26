@@ -1,6 +1,6 @@
 # Kumi: Kubernetes Documentation Assistant with RAG
 
-<p align="center"><img src="asset/demo_1_1.gif" width="800"></p>
+<p align="center"><img src="asset/demo_10_9.gif" width="800"></p>
 
 ## Introduction
 
@@ -118,7 +118,7 @@ $ make chat-end
 
 Then, open your web browser and go to `localhost:9000` to start chatting with Kumi!
 
-<p align="center"><img src="asset/interface2.png" width="800"></p>
+<p align="center"><img src="asset/interface3.png" width="800"></p>
 
 Enjoy your conversation with Kumi and happy exploring!
 
