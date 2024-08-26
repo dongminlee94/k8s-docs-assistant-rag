@@ -1,6 +1,6 @@
 # Kumi: Kubernetes Documentation Assistant with RAG
 
-<p align="center"><img src="https://imgur.com/jQ1vSNz" width="800"></p>
+<p align="center"><img src="https://imgur.com/jQ1vSNz.gif" width="800"></p>
 
 ## Introduction
 
