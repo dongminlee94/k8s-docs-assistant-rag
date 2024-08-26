@@ -116,10 +116,10 @@ To end the chat session with Kumi, use the following command:
 $ make chat-end
 ```
 
-Then, open your web browser and go to `localhost:9000` to start chatting with Kumi!
+Then, open your web browser and navigate to `localhost:9000` to begin your interactive session with Kumi.
 
 <p align="center"><img src="asset/interface.png" width="800"></p>
 
-Enjoy your conversation with Kumi and happy exploring!
+I hope you find the answers you need about Kubernetes quickly and easily through your chat with Kumi.
 
-Thank you for using Kumi.
+Thank you for using Kumi!
