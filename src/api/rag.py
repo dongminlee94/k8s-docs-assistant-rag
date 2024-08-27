@@ -103,8 +103,8 @@ class DocsRAG:
             os.path.dirname(__file__), "../..", "prompt", f"{self._prompt_name}.yaml"
         )
 
-        with open(prompt_file_path, "r", encoding="utf-8") as file:
-            prompt = yaml.safe_load(file)
+        with open(prompt_file_path, "r", encoding="utf-8") as fp:
+            prompt = yaml.safe_load(fp)
 
         if not isinstance(prompt, list) or not all(
             isinstance(piece, str) and len(msg) == 2 for msg in prompt for piece in msg
@@ -155,7 +155,8 @@ class DocsRAG:
 
         :param content: The input content to search for similar documents.
         :param top_k: The number of top similar documents to retrieve.
-        :returns: A DataFrame containing the top_k most similar documents.
+        :returns: A DataFrame containing the top_k most similar documents,
+                  including unique "title", "url", and "content".
 
         Example:
             >>> rag = DocsRAG(
@@ -174,7 +175,10 @@ class DocsRAG:
         embedding_output = self._openai_client.create_embedding(text=content, model=self._embedding_model)
         search_result = self._index.search(np.array([embedding_output]), top_k)
 
-        return self._vector_db.iloc[list(search_result[1][0])].reset_index(drop=True)
+        search_df = self._vector_db.iloc[list(search_result[1][0])].reset_index(drop=True)
+        search_df.drop_duplicates(subset=["title", "url", "content"], keep="first", inplace=True)
+
+        return search_df
 
     def create_chat_response(
         self,
@@ -206,8 +210,6 @@ class DocsRAG:
             >>> print(response)
             # "When managing large Kubernetes clusters, consider..."
         """
-        search_df.drop_duplicates(subset=["title", "url", "content"], keep="first", inplace=True)
-
         documents = "--- RELATED INTERNAL DOCUMENTS ---\n"
         for row in search_df.itertuples():
             documents += f"관련된 내부 문서 {row.Index + 1}\n"
