@@ -27,8 +27,16 @@ def crawl_docs() -> None:
     failed = [result for result in results if not result["suceess"]]
 
     if failed:
-        print(f"crawling failed: {failed}")
+        print(f"Crawling failed: {failed}")
         raise
+
+    new_doc_paths = [result["result"] for result in results if ".json" in result["result"]]
+
+    if new_doc_paths:
+        print(
+            f"The number of new document paths: {len(new_doc_paths)}\n"
+            f"The list of new document paths: {new_doc_paths}\n"
+        )
 
 
 def embed_docs() -> None:
