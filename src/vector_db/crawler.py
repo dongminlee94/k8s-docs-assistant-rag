@@ -119,13 +119,13 @@ class K8sDocsCrawler:
 
         return list(set(urls))
 
-    def _create_doc(self, index: int, url: str) -> tuple[int, str, str | Exception | None, bool]:
+    def _create_doc(self, index: int, url: str) -> tuple[int, str, str | Exception, bool]:
         """
         Create a documentation JSON file from the given URL.
 
         :param index: The index of the URL in the list.
         :param url: The documentation URL.
-        :returns: A tuple containing the index, URL, result (error message or None), and success flag.
+        :returns: A tuple containing the index, URL, result, and success flag.
         :raises requests.exceptions.RequestException: If there is an issue with the HTTP request.
         :raises Exception: For other exceptions that may occur during processing.
         """
