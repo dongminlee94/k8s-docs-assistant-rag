@@ -25,8 +25,44 @@ class K8sDocsCrawler:
         :param target_subdomains: List of target subdomains to process.
         """
         self._url = url
-        self._target_subdomains = target_subdomains
         self._base_url = self._get_base_url()
+        self._target_subdomains = target_subdomains
+
+        self._base_dir = "data/docs"
+        os.makedirs(self._base_dir, exist_ok=True)
+
+        self._url_file_map = self._get_url_file_map()
+
+    def _get_base_url(self) -> str:
+        """
+        Extract the base URL from the provided URL.
+
+        :returns: The base URL.
+        """
+        splited_url = self._url.split("//")
+        domain = splited_url[1].split("/")[0]
+
+        return f"{splited_url[0]}//{domain}"
+
+    def _get_url_file_map(self) -> dict[str, dict[str, str]]:
+        """Map URLs to their corresponding file paths in the local storage.
+
+        :returns: A dictionary with URLs as keys and their file paths as values.
+        """
+        url_file_map = {}
+
+        def __get_url_file_map(input_dir: str) -> dict[str, dict[str, str]]:
+            for entry in os.scandir(input_dir):
+                if entry.is_dir():
+                    __get_url_file_map(entry.path)
+                elif entry.is_file():
+                    with open(entry.path, "r", encoding="utf-8") as fp:
+                        doc = json.load(fp)
+                        url_file_map[doc[0]["url"]] = entry.path
+
+            return url_file_map
+
+        return __get_url_file_map(input_dir=self._base_dir)
 
     def _requests_retry_session(
         self,
@@ -59,17 +95,6 @@ class K8sDocsCrawler:
 
         return session
 
-    def _get_base_url(self) -> str:
-        """
-        Extract the base URL from the provided URL.
-
-        :returns: The base URL.
-        """
-        splited_url = self._url.split("//")
-        domain = splited_url[1].split("/")[0]
-
-        return f"{splited_url[0]}//{domain}"
-
     def get_all_urls(self) -> list[str]:
         """
         Retrieve all documentation URLs from the main documentation page.
@@ -94,24 +119,6 @@ class K8sDocsCrawler:
 
         return list(set(urls))
 
-    @staticmethod
-    def _save_json_file(
-        file_object: list[dict[str, str]],
-        file_path: str,
-        ensure_ascii: bool = False,
-        indent: int = 4,
-    ) -> None:
-        """
-        Save a JSON file to the specified path.
-
-        :param file_object: The Python object to be saved as a JSON file.
-        :param file_path: The file path where the JSON file will be saved.
-        :param ensure_ascii: Ensure ASCII characters in the JSON file.
-        :param indent: Indentation level for the JSON file.
-        """
-        with open(file_path, "w", encoding="utf-8") as file_path:
-            json.dump(obj=file_object, fp=file_path, ensure_ascii=ensure_ascii, indent=indent)
-
     def _create_doc(self, index: int, url: str) -> tuple[int, str, str | Exception | None, bool]:
         """
         Create a documentation JSON file from the given URL.
@@ -135,16 +142,6 @@ class K8sDocsCrawler:
                 result = "No title"
                 return index, url, result, success
 
-            sub_dir = url.split("/docs/")[1].split("/")[0]
-            output_sub_dir = os.path.join("data/docs", sub_dir)
-
-            file_name = title.replace(" ", "_").replace("/", "_") + ".json"
-            file_path = os.path.join(output_sub_dir, file_name)
-
-            if os.path.exists(file_path):
-                result = "Document already exists"
-                return index, url, result, success
-
             content = soup.find("div", {"class": "td-content"})
 
             if not content:
@@ -162,10 +159,34 @@ class K8sDocsCrawler:
 
             content = "\n".join(content_parts)
 
-            doc_data = [{"title": title, "url": url, "content": content}]
+            sub_dir = url.split("/docs/")[1].split("/")[0]
+            output_dir = os.path.join(self._base_dir, sub_dir)
 
-            os.makedirs(output_sub_dir, exist_ok=True)
-            self._save_json_file(file_object=doc_data, file_path=file_path)
+            file_name = title.replace(" ", "_").replace("/", "_") + ".json"
+            file_path = os.path.join(output_dir, file_name)
+
+            if url in self._url_file_map:
+                old_file_path = self._url_file_map[url]
+
+                with open(old_file_path, "r", encoding="utf-8") as fp:
+                    old_content = json.load(fp)[0]["content"]
+
+                if old_content == content:
+                    result = "Document already exists"
+                    return index, url, result, success
+                else:
+                    os.remove(old_file_path)
+                    del self._url_file_map[url]
+
+            os.makedirs(output_dir, exist_ok=True)
+
+            doc_data = [{"title": title, "url": url, "content": content, "file_path": file_path}]
+
+            with open(file_path, "w", encoding="utf-8") as fp:
+                json.dump(obj=doc_data, fp=fp, ensure_ascii=False, indent=4)
+
+            result = file_path
+            self._url_file_map[url] = file_path
         except Exception as error:
             result = error
             success = False
