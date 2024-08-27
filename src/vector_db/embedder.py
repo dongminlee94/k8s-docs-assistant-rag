@@ -31,18 +31,33 @@ class DocsEmbedder:
             "title",
             "url",
             "content",
+            "file_path",
             "embedding_input",
             "embedding_output",
         ]
 
-    def _read_docs(self, embedded_urls: set[str]) -> pd.DataFrame:
+    def _get_vector_db_df(self) -> pd.DataFrame:
+        """Load the existing vector database from a Parquet file, or initialize an empty DataFrame.
+
+        :returns: A DataFrame containing the existing vector database or an empty DataFrame with base columns.
+        """
+        if os.path.exists(self._output_path):
+            vector_db_df = pd.read_parquet(self._output_path)
+        else:
+            vector_db_df = pd.DataFrame(columns=self._base_columns)
+
+        return vector_db_df
+
+    def _read_docs(self) -> pd.DataFrame:
         """Read and filter documentation files from the target subdomains.
 
-        :param embedded_urls: A set of URLs that have already been embedded.
         :returns: A DataFrame containing the unembedded documentation data.
         :note: This method reads all JSON files from the specified input directory, filters out the ones that
                have already been embedded (based on their URLs), and returns the remaining data.
         """
+        vector_db_df = self._get_vector_db_df()
+        vector_db_urls = set(vector_db_df["url"])
+
         dfs = []
 
         def __read_docs(input_dir: str) -> pd.DataFrame:
@@ -51,8 +66,14 @@ class DocsEmbedder:
                     __read_docs(entry.path)
                 elif entry.is_file():
                     df = pd.read_json(entry.path)
+                    url = df.iloc[0]["url"]
 
-                    if df["url"].item() not in embedded_urls:
+                    if url in vector_db_urls:
+                        content = vector_db_df[vector_db_df["url"] == url].iloc[0]["content"]
+
+                        if content != df.iloc[0]["content"]:
+                            dfs.append(df)
+                    else:
                         dfs.append(df)
 
             return pd.concat(objs=dfs, ignore_index=True) if dfs else pd.DataFrame(columns=self._base_columns)
@@ -86,20 +107,18 @@ class DocsEmbedder:
             - embedded_df: DataFrame with already embedded data.
             - unembedded_df: DataFrame with data to be embedded.
         """
-        if os.path.exists(self._output_path):
-            embedded_df = pd.read_parquet(self._output_path)
-            embedded_urls = set(embedded_df["url"].unique())
-        else:
-            embedded_df = pd.DataFrame(columns=self._base_columns)
-            embedded_urls = set()
+        vector_db_df = self._get_vector_db_df()
 
-        unembedded_df = self._read_docs(embedded_urls=embedded_urls)
-        unembedded_df["embedding_input"] = unembedded_df["title"] + " " + unembedded_df["content"]
+        docs_df = self._read_docs()
+        docs_df["embedding_input"] = docs_df["title"] + " " + docs_df["content"]
+
+        embedded_df = vector_db_df[~vector_db_df["url"].isin(docs_df["url"].unique())]
+        embedded_urls = set(embedded_df["url"])
 
         encoder = tiktoken.encoding_for_model(model_name=model)
 
         rows = []
-        for row in unembedded_df.itertuples():
+        for row in docs_df.itertuples():
             if row.url in embedded_urls:
                 continue
 
@@ -113,6 +132,7 @@ class DocsEmbedder:
                         "title": row.title,
                         "url": row.url,
                         "content": row.content,
+                        "file_path": row.file_path,
                         "embedding_input": text,
                         "embedding_output": None,
                     },
@@ -167,6 +187,10 @@ class DocsEmbedder:
         new_embedded_df = self._get_embedding_output(
             unembedded_df=unembedded_df, model=model, verbose=verbose
         )
+
+        if not new_embedded_df.empty:
+            print(f'The number of newly embedded file paths: {len(new_embedded_df["file_path"])}')
+            print(f'The list of newly embedded file paths: {new_embedded_df["file_path"].tolist()}')
 
         vector_db_df = pd.concat([embedded_df, new_embedded_df], ignore_index=True)
         vector_db_df.to_parquet(path=self._output_path, index=False)
