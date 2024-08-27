@@ -28,10 +28,10 @@ class DocsEmbedder:
         self._output_path = os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
 
         self._base_columns = [
+            "file_path",
             "title",
             "url",
             "content",
-            "file_path",
             "embedding_input",
             "embedding_output",
         ]
@@ -129,10 +129,10 @@ class DocsEmbedder:
 
                 rows.append(
                     {
+                        "file_path": row.file_path,
                         "title": row.title,
                         "url": row.url,
                         "content": row.content,
-                        "file_path": row.file_path,
                         "embedding_input": text,
                         "embedding_output": None,
                     },
@@ -189,8 +189,10 @@ class DocsEmbedder:
         )
 
         if not new_embedded_df.empty:
-            print(f'The number of newly embedded file paths: {len(new_embedded_df["file_path"])}')
-            print(f'The list of newly embedded file paths: {new_embedded_df["file_path"].tolist()}')
+            print(
+                f'The number of newly embedded file paths: {len(new_embedded_df["file_path"])}\n'
+                f'The list of newly embedded file paths: {new_embedded_df["file_path"].tolist()}\n'
+            )
 
         vector_db_df = pd.concat([embedded_df, new_embedded_df], ignore_index=True)
         vector_db_df.to_parquet(path=self._output_path, index=False)

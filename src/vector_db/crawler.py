@@ -159,12 +159,6 @@ class K8sDocsCrawler:
 
             content = "\n".join(content_parts)
 
-            sub_dir = url.split("/docs/")[1].split("/")[0]
-            output_dir = os.path.join(self._base_dir, sub_dir)
-
-            file_name = title.replace(" ", "_").replace("/", "_") + ".json"
-            file_path = os.path.join(output_dir, file_name)
-
             if url in self._url_file_map:
                 old_file_path = self._url_file_map[url]
 
@@ -178,9 +172,19 @@ class K8sDocsCrawler:
                     os.remove(old_file_path)
                     del self._url_file_map[url]
 
+            splited_sub_url = url.split("/docs/")[1].split("/")
+            output_dir = os.path.join(self._base_dir, splited_sub_url[0])
             os.makedirs(output_dir, exist_ok=True)
 
-            doc_data = [{"title": title, "url": url, "content": content, "file_path": file_path}]
+            sub_path = "_".join(splited_sub_url[1:-1])
+            suffix = title.replace(" ", "_").replace("/", "_") + ".json"
+
+            if sub_path:
+                file_path = os.path.join(output_dir, sub_path + "_" + suffix)
+            else:
+                file_path = os.path.join(output_dir, suffix)
+
+            doc_data = [{"file_path": file_path, "title": title, "url": url, "content": content}]
 
             with open(file_path, "w", encoding="utf-8") as fp:
                 json.dump(obj=doc_data, fp=fp, ensure_ascii=False, indent=4)
