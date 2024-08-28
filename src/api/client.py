@@ -14,6 +14,7 @@ class OpenAIClient:
 
         :param api_key: The API key to authenticate with the OpenAI service.
         """
+        # Initialize the OpenAI client with the provided API key
         self._client = OpenAI(api_key=api_key)
 
     def create_embedding(self, text: str, model: str) -> list[float]:
@@ -60,8 +61,10 @@ class OpenAIClient:
             >>> print(response)
             "Why don't scientists trust atoms? Because they make up everything!"
         """
+        # Set default response format if none is provided
         response_format = response_format if response_format else {}
 
+        # Use OpenAI client to generate a completion for the given messages using the specified model
         response = self._client.chat.completions.create(
             messages=messages,
             model=model,
@@ -69,6 +72,7 @@ class OpenAIClient:
             temperature=temperature,
         )
 
+        # Check if the response contains exactly one choice
         if len(response.choices) != 1:
             raise Exception(response)
 

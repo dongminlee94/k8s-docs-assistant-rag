@@ -36,6 +36,7 @@ class DocsRAG:
         :param completion_model: The completion model name to check against its context window.
         :param completion_context_window: The max tokens allowed in the completion model's context window.
         """
+        # Initialize the OpenAI client and set model parameters
         self._openai_client = OpenAIClient(api_key=api_key)
         self._prompt_name = prompt_name
         self._embedding_model = embedding_model
@@ -43,9 +44,11 @@ class DocsRAG:
         self._completion_model = completion_model
         self._completion_context_window = completion_context_window
 
+        # Load vector database and create Faiss index for similarity search
         self._vector_db = self._get_vector_db()
         self._index = self._get_index()
 
+        # Initialize chat history with base prompt
         self.clear_chat_history()
 
     def _get_vector_db(self) -> pd.DataFrame:
@@ -53,8 +56,10 @@ class DocsRAG:
 
         :returns: A pandas DataFrame containing the vector database.
         """
+        # Define the file path for the vector database
         file_path = os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
 
+        # Wait until the vector database file is available
         while not os.path.exists(file_path):
             print("The vector_db.parquet file is not found. Please wait while it is being created...")
             time.sleep(10)
@@ -66,9 +71,13 @@ class DocsRAG:
 
         :returns: A Faiss IndexIDMap object for performing similarity search on the vector database.
         """
+        # Convert embedding data to a Numpy array for indexing
         embedding_data = np.array(list(self._vector_db["embedding_output"]))
 
+        # Create a Faiss index with inner product similarity
         index = faiss.IndexIDMap(faiss.IndexFlatIP(embedding_data.shape[1]))
+
+        # Add data to the index with IDs
         index.add_with_ids(embedding_data, np.array(range(0, len(self._vector_db))))
 
         return index
@@ -99,6 +108,7 @@ class DocsRAG:
             >>> print(rag.chat)
             # Output: [{'role': 'system', 'content': 'You are an assistant.'}, ...] # Reset to initial state
         """
+        # Load the base prompt from the YAML file
         prompt_file_path = os.path.join(
             os.path.dirname(__file__), "../..", "prompt", f"{self._prompt_name}.yaml"
         )
@@ -106,11 +116,13 @@ class DocsRAG:
         with open(prompt_file_path, "r", encoding="utf-8") as fp:
             prompt = yaml.safe_load(fp)
 
+        # Validate the prompt structure
         if not isinstance(prompt, list) or not all(
             isinstance(piece, str) and len(msg) == 2 for msg in prompt for piece in msg
         ):
             raise ValueError('The prompt must be a list of pairs like [["role", "content"]].')
 
+        # Initialize chat history with the prompt messages
         self.chat = [{"role": msg[0], "content": msg[1]} for msg in prompt]
 
     def check_token_limit(self, content: str) -> bool:
@@ -135,16 +147,20 @@ class DocsRAG:
         ... else:
         ...     print("Token limit exceeded.")
         """
+        # Combine chat history and new content for token count
         contents = "".join([chat["content"] for chat in self.chat])
         contents += content
 
+        # Check token limits for embedding and completion models
         for model, limit, text in [
             [self._embedding_model, self._embedding_max_tokens, content],
             [self._completion_model, self._completion_context_window, contents],
         ]:
+            # Encode the text to count tokens
             encoder = tiktoken.encoding_for_model(model_name=model)
             tokens = encoder.encode(text=text)
 
+            # Return False if token limit is exceeded
             if len(tokens) > limit:
                 return False
 
@@ -172,9 +188,13 @@ class DocsRAG:
             >>> print(search_df)
             # DataFrame with columns containing the top_k similar documents.
         """
+        # Generate embedding for the input content
         embedding_output = self._openai_client.create_embedding(text=content, model=self._embedding_model)
+
+        # Perform similarity search using Faiss index
         search_result = self._index.search(np.array([embedding_output]), top_k)
 
+        # Retrieve search results from vector database and remove duplicates
         search_df = self._vector_db.iloc[list(search_result[1][0])].reset_index(drop=True)
         search_df.drop_duplicates(subset=["title", "url", "content"], keep="first", inplace=True)
 
@@ -210,6 +230,7 @@ class DocsRAG:
             >>> print(response)
             # "When managing large Kubernetes clusters, consider..."
         """
+        # Prepare document information to include in the chat context
         documents = "--- RELATED INTERNAL DOCUMENTS ---\n"
         for row in search_df.itertuples():
             documents += f"관련된 내부 문서 {row.Index + 1}\n"
@@ -217,9 +238,12 @@ class DocsRAG:
             documents += f" - URL: {row.url}\n"
             documents += f" - Content: {row.content}\n\n"
 
+        # Add system message with document information to chat history
         self.chat.append({"role": "system", "content": documents})
+        # Add user question to chat history
         self.chat.append({"role": "user", "content": f"--- QUESTION ---\n{content}"})
 
+        # Generate response using OpenAI completion API
         response = self._openai_client.create_completion(
             messages=self.chat,
             model=self._completion_model,
@@ -227,6 +251,7 @@ class DocsRAG:
             temperature=temperature,
         )
 
+        # Add assistant response to chat history
         self.chat.append({"role": "assistant", "content": response})
 
         return response

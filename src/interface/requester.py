@@ -21,14 +21,17 @@ def requests_retry_session(
             We also use an "exponential backoff" strategy,
             where the delay is "backoff_factor * (2 ^ (retry count - 1))" after each failed retry.
     """
+    # Configure retry strategy
     retry = Retry(
         total=max_retries,
         backoff_factor=backoff_factor,
         status_forcelist=status_forcelist,
     )
 
+    # Create an HTTP adapter with the retry strategy
     adapter = HTTPAdapter(max_retries=retry)
 
+    # Create and configure the session
     session = Session()
     session.mount(prefix="http://", adapter=adapter)
 
