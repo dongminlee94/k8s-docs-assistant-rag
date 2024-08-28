@@ -14,7 +14,7 @@ Below is a breakdown of the structure and the number of documents available in e
 - [concepts](https://kubernetes.io/docs/concepts): 145 documents
 - [contribute](https://kubernetes.io/docs/contribute): 32 documents
 - [home](https://kubernetes.io/docs/home): 1 documents
-- [reference](https://kubernetes.io/docs/reference): 323 documents
+- [reference](https://kubernetes.io/docs/reference): 315 documents
 - [setup](https://kubernetes.io/docs/setup): 22 documents
 - [tasks](https://kubernetes.io/docs/tasks): 198 documents
 - [test](https://kubernetes.io/docs/test): 1 documents
