@@ -119,6 +119,27 @@ class K8sDocsCrawler:
 
         return list(set(urls))
 
+    def _generate_file_path(self, url: str, title: str) -> str:
+        """Generate a file path for the documentation based on the URL and title.
+
+        :param url: The documentation URL.
+        :param title: The title of the documentation.
+        :returns: A string representing the file path where the documentation JSON will be saved.
+        """
+        splited_sub_url = url.split("/docs/")[1].split("/")
+        output_dir = os.path.join(self._base_dir, splited_sub_url[0])
+        os.makedirs(output_dir, exist_ok=True)
+
+        sub_path = "_".join(splited_sub_url[1:-1])
+        suffix = title.replace(" ", "_").replace("/", "_") + ".json"
+
+        if sub_path:
+            file_path = os.path.join(output_dir, sub_path + "_" + suffix)
+        else:
+            file_path = os.path.join(output_dir, suffix)
+
+        return file_path
+
     def _create_doc(self, index: int, url: str) -> tuple[int, str, str | Exception, bool]:
         """
         Create a documentation JSON file from the given URL.
@@ -172,18 +193,7 @@ class K8sDocsCrawler:
                     os.remove(old_file_path)
                     del self._url_file_map[url]
 
-            splited_sub_url = url.split("/docs/")[1].split("/")
-            output_dir = os.path.join(self._base_dir, splited_sub_url[0])
-            os.makedirs(output_dir, exist_ok=True)
-
-            sub_path = "_".join(splited_sub_url[1:-1])
-            suffix = title.replace(" ", "_").replace("/", "_") + ".json"
-
-            if sub_path:
-                file_path = os.path.join(output_dir, sub_path + "_" + suffix)
-            else:
-                file_path = os.path.join(output_dir, suffix)
-
+            file_path = self._generate_file_path(url=url, title=title)
             doc_data = [{"file_path": file_path, "title": title, "url": url, "content": content}]
 
             with open(file_path, "w", encoding="utf-8") as fp:
