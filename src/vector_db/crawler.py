@@ -24,6 +24,7 @@ class K8sDocsCrawler:
         :param url: The base URL of the Kubernetes documentation.
         :param target_subdomains: List of target subdomains to process.
         """
+        # Initialize instance variables
         self._url = url
         self._base_url = self._get_base_url()
         self._target_subdomains = target_subdomains

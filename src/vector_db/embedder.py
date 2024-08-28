@@ -24,9 +24,11 @@ class DocsEmbedder:
         self._openai_client = OpenAI(api_key=api_key)
         self._target_subdomains = target_subdomains
 
+        # Set up input and output directories
         self._input_dir = os.path.join(os.path.dirname(__file__), "../..", "data/docs")
         self._output_path = os.path.join(os.path.dirname(__file__), "../..", "data/vector_db.parquet")
 
+        # Define base columns for DataFrame
         self._base_columns = [
             "file_path",
             "title",
@@ -55,19 +57,23 @@ class DocsEmbedder:
         :note: This method reads all JSON files from the specified input directory, filters out the ones that
                have already been embedded (based on their URLs), and returns the remaining data.
         """
+        # Load existing vector database to filter already embedded documents
         vector_db_df = self._get_vector_db_df()
         vector_db_urls = set(vector_db_df["url"])
 
         dfs = []
 
         def __read_docs(input_dir: str) -> pd.DataFrame:
+            # Recursively read documents from subdirectories
             for entry in os.scandir(input_dir):
                 if entry.is_dir() and entry.name in self._target_subdomains:
                     __read_docs(entry.path)
                 elif entry.is_file():
+                    # Read JSON file and extract URL
                     df = pd.read_json(entry.path)
                     url = df.iloc[0]["url"]
 
+                    # Check if document has already been embedded
                     if url in vector_db_urls:
                         content = vector_db_df[vector_db_df["url"] == url].iloc[0]["content"]
 
@@ -107,23 +113,30 @@ class DocsEmbedder:
             - embedded_df: DataFrame with already embedded data.
             - unembedded_df: DataFrame with data to be embedded.
         """
+        # Load existing vector database and read new documents
         vector_db_df = self._get_vector_db_df()
 
+        # Combine title and content for embedding input
         docs_df = self._read_docs()
         docs_df["embedding_input"] = docs_df["title"] + " " + docs_df["content"]
 
+        # Separate embedded and unembedded documents
         embedded_df = vector_db_df[~vector_db_df["url"].isin(docs_df["url"].unique())]
         embedded_urls = set(embedded_df["url"])
 
+        # Initialize encoder for the specified model
         encoder = tiktoken.encoding_for_model(model_name=model)
 
         rows = []
+        # Process each document and split into token chunks
         for row in docs_df.itertuples():
             if row.url in embedded_urls:
                 continue
 
+            # Encode text into tokens
             tokens = encoder.encode(text=row.embedding_input)
 
+            # Split tokens into chunks and decode back to text
             for chunk in self._make_chunks(data=tokens, length=max_tokens):
                 text = encoder.decode(tokens=chunk)
 
@@ -155,12 +168,15 @@ class DocsEmbedder:
         """
         print(f"The number of rows in the DataFrame to embed: {len(unembedded_df)}")
 
+        # Generate embeddings for each unembedded input
         for row in tqdm(unembedded_df.itertuples()) if verbose else unembedded_df.itertuples():
             embedding_output = (
                 self._openai_client.embeddings.create(input=row.embedding_input, model=model)
                 .data[0]
                 .embedding
             )
+
+            # Update the DataFrame with the new embedding
             unembedded_df.loc[row.Index, "embedding_output"] = embedding_output
 
         return unembedded_df
@@ -183,7 +199,10 @@ class DocsEmbedder:
             >>> embedder = DocsEmbedder(api_key="your_api_key")
             >>> embedder.embed_docs(model="text-embedding-3-large", max_tokens=8192, verbose=True)
         """
+        # Prepare data for embedding
         embedded_df, unembedded_df = self._get_embedding_input(model=model, max_tokens=max_tokens)
+
+        # Generate new embeddings for the unembedded data
         new_embedded_df = self._get_embedding_output(
             unembedded_df=unembedded_df, model=model, verbose=verbose
         )
@@ -194,5 +213,6 @@ class DocsEmbedder:
                 f'The list of newly embedded file paths: {new_embedded_df["file_path"].tolist()}\n'
             )
 
+        # Concatenate the new embeddings with the existing ones and save to Parquet
         vector_db_df = pd.concat([embedded_df, new_embedded_df], ignore_index=True)
         vector_db_df.to_parquet(path=self._output_path, index=False)
