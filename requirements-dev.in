@@ -1,6 +1,0 @@
--c requirements.txt
-black==24.8.0
-flake8==7.1.1
-isort==5.13.2
-pip-tools==7.4.1
-pre-commit==3.8.0

@@ -2,32 +2,12 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      - id: check-added-large-files
-        args: ["--maxkb=20000"]
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: end-of-file-fixer
       - id: mixed-line-ending
+      - id: requirements-txt-fixer
       - id: trailing-whitespace
-
-  - repo: https://github.com/jazzband/pip-tools
-    rev: 7.4.1
-    hooks:
-      - id: pip-compile
-        name: pip-compile requirements.in
-        args: [requirements.in]
-        files: ^requirements\.(in|txt)$
-      - id: pip-compile
-        name: pip-compile requirements-dev.in
-        args: [requirements-dev.in]
-        files: ^requirements-dev\.(in|txt)$
-
-  - repo: local
-    hooks:
-      - id: requirements-in-fixer
-        name: fix requirements.in
-        language: system
-        entry: make requirements-in-fixer
 
   - repo: local
     hooks:

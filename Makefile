@@ -6,14 +6,6 @@ setup-dev:
 	pip install -r requirements-dev.txt
 	pre-commit install
 
-requirements:
-	pip-compile requirements.in
-	pip-compile requirements-dev.in
-
-requirements-in-fixer:
-	python -c "with open('requirements.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements.in', 'w').writelines(lines)"
-	python -c "with open('requirements-dev.in', 'r') as f: lines = sorted(f.readlines(), key=str.lower); open('requirements-dev.in', 'w').writelines(lines)"
-
 check:
 	make format
 	make lint

@@ -11,14 +11,14 @@ Kumi was developed to address this issue.
 As of August 2024, [the Kubernetes official documentation](https://kubernetes.io/docs) consists of various subdomains, each containing a different number of documents.
 Below is a breakdown of the structure and the number of documents available in each subdomain:
 
-- [concepts](https://kubernetes.io/docs/concepts): 154 documents
-- [contribute](https://kubernetes.io/docs/contribute): 33 documents
+- [concepts](https://kubernetes.io/docs/concepts): 145 documents
+- [contribute](https://kubernetes.io/docs/contribute): 32 documents
 - [home](https://kubernetes.io/docs/home): 1 documents
-- [reference](https://kubernetes.io/docs/reference): 361 documents
-- [setup](https://kubernetes.io/docs/setup): 24 documents
-- [tasks](https://kubernetes.io/docs/tasks): 209 documents
+- [reference](https://kubernetes.io/docs/reference): 315 documents
+- [setup](https://kubernetes.io/docs/setup): 22 documents
+- [tasks](https://kubernetes.io/docs/tasks): 198 documents
 - [test](https://kubernetes.io/docs/test): 1 documents
-- [tutorials](https://kubernetes.io/docs/tutorials): 45 documents
+- [tutorials](https://kubernetes.io/docs/tutorials): 38 documents
 
 Given the vast amount of documentation, using RAG offers several benefits to make navigating and understanding these documents more efficient:
 
