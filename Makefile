@@ -6,10 +6,6 @@ setup-dev:
 	pip install -r requirements-dev.txt
 	pre-commit install
 
-check:
-	make format
-	make lint
-
 format:
 	black . --line-length 110
 	isort . --profile black
